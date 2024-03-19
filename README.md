@@ -4,6 +4,11 @@
 * Technologies: Java, Swing, Socket 
 * Assets: Werewolf Game, Icons8
 * Architect: Server-Client
+## Task done
+* Login to game
+* Create room with specific config
+* Join room
+* Chat
 ## Requirements
 * Product Version: Apache NetBeans IDE 19
 * Java: 11.0.20; Java HotSpot(TM) 64-Bit Server VM 11.0.20+9-LTS-256
