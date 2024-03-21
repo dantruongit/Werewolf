@@ -101,12 +101,12 @@ public class SocketService implements TemplateService{
                             room.players.add(player);
                             room.owner = player;
                             response.setData(room);
+                            player.room = room;
                             RoomService.gI().rooms.add(room);
                             writeMessage(response);
                             break;
                         }
                         case Constaint.MESSAGE_LOAD_ROOM:{
-                            System.out.println("Đang có " + RoomService.gI().rooms.size() + " rooms");
                             response.setData(RoomService.gI().rooms);
                             writeMessage(response);
                             break;
@@ -131,6 +131,16 @@ public class SocketService implements TemplateService{
                             RoomService.gI().reloadPlayer(room);
                             break;
                         }
+                        
+                        case Constaint.MESSAGE_LEAVE_ROOM:{
+                            Room room = RoomService.gI().getRoomById(player.room.idRoom);
+                            if(room != null){
+                                RoomService.gI().leavedPlayer(player, room);
+                                RoomService.gI().reloadPlayer(room);
+                            }
+                            break;
+                        }
+                        
                         //Note
                         case Constaint.MESSAGE_START_GAME:{
                             if(this.player.room.owner == this.player){

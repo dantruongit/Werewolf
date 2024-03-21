@@ -27,6 +27,7 @@ public class Constaint {
     public static final byte MESSAGE_JOIN_SERVER = -128;
     public static final byte MESSAGE_LOAD_ROOM = -127;
     public static final byte MESSAGE_JOIN_ROOM = -126;
+    public static final byte MESSAGE_LEAVE_ROOM = -100;
     public static final byte MESSAGE_RELOAD_PLAYER = -101;
     public static final byte MESSAGE_HAS_BANNED = -125;
     public static final byte MESSAGE_GET_CONFIG_ROLE = -103;

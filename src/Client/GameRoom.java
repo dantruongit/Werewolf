@@ -10,6 +10,7 @@ import config.Constaint;
 import javax.swing.JLabel;
 import Model.*;
 import java.awt.Color;
+import java.util.List;
 
 public class GameRoom extends javax.swing.JPanel {
     
@@ -98,13 +99,13 @@ public class GameRoom extends javax.swing.JPanel {
     public void reloadPlayers(){
         int index = 0;
         var players = Service.gI().dataSource.player.room.players;
-        System.out.println("Có " + players.size() + " player");
         for(Player p: players){
             playersUI[index++].loadPlayer(p);
         }
         for(int j = index; j < 9; j++){
             resetUI(playersUI[j]);
         }
+        addMessage("Load được " + Service.gI().dataSource.player.room.players.size());
     }
     
     private void turnNight(){
@@ -130,12 +131,16 @@ public class GameRoom extends javax.swing.JPanel {
         txtChat.setText(old + "\n" + message);
     }
     
+    public void updateStage(Stage stage){
+        gui.changePanel(mainPanel, new PanelTime(stage));
+    }
+    
     public GameRoom() {
         initComponents();
         initGUI();
-        Service.gI().panelGame = this;
-        gui.changePanel(mainPanel, new PanelStatus());
-//        reloadPlayers();
+        Service.gI().panelGame  = this;
+        gui.changePanel(mainPanel, new PanelStatus(Service.gI().dataSource.player.room.configs));
+        reloadPlayers();
     }
 
     /**
@@ -831,7 +836,8 @@ public class GameRoom extends javax.swing.JPanel {
     }
     
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
-        // TODO add your handling code here:
+        Service.gI().sendMessage(Constaint.MESSAGE_LEAVE_ROOM, null);
+        Service.gI().frm.changePanel(new HomePanel());
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void txtInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtInputActionPerformed

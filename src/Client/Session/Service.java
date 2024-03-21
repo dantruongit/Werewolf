@@ -61,6 +61,6 @@ public class Service {
     public void sendMessage(byte code, Object data){
         Message msg = new Message(code, data);
         this.writer.writeMessage(msg);
-        System.out.println("Send: " + code);
+//        System.out.println("Send: " + code);
     }
 }

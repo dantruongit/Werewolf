@@ -1,12 +1,12 @@
 package Client;
 
 import Client.Session.Service;
+import Client.utils.gui;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
-import utils.gui;
 
 /**
  *
@@ -27,12 +27,12 @@ public class TemplateFrm extends javax.swing.JFrame {
         initComponents();
         //String namePlayer = JOptionPane.showInputDialog("Nhập tên của bạn: ");
         
-//        String namePlayer = "A";
-//        if(namePlayer == null || namePlayer.equals("")){
-//            System.exit(0);
-//        }
-//        Service.gI().joinGame(namePlayer);
-//        Service.gI().init();
+        String namePlayer = "Đan Trường";
+        if(namePlayer == null || namePlayer.equals("")){
+            System.exit(0);
+        }
+        Service.gI().joinGame(namePlayer);
+        Service.gI().init();
 
 
         Service.gI().frm = this;
@@ -40,7 +40,7 @@ public class TemplateFrm extends javax.swing.JFrame {
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setIconImage(new ImageIcon(getClass().getResource("/assets/icon.png")).getImage());
         
-        gui.changePanel(mainPanel, new GameRoom());
+        gui.changePanel(mainPanel, new PlayPanel());
     }
     
     public void changePanel(JPanel target){

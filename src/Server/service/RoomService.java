@@ -39,6 +39,11 @@ public class RoomService implements TemplateService{
                                     new Message(Constaint.MESSAGE_RELOAD_PLAYER, room));
     }
     
+    public void leavedPlayer(Player target, Room room){
+        room.players.removeIf(p -> p.idPlayer == target.idPlayer);
+        MessageService.gI().chat(target, "[Đã rời khỏi phòng].");
+    }
+    
     public void kickPlayer(Player target, Room room, boolean isBan){
         boolean remove = room.players.remove(target);
         if(remove){

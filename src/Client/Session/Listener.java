@@ -23,7 +23,7 @@ public class Listener extends Thread{
             try {
                 Message message = (Message)ois.readObject();
                 Object data = message.getData();
-                System.out.println("[Receive] " + message.getMessageCode());
+                System.out.println("Receive : " + message.getMessageCode());
                 switch(message.getMessageCode()){
                     case Constaint.MESSAGE_GET_CONFIG_ROLE:{
                         service.dataSource.roleConfigs = (List<Role>)data;
@@ -60,10 +60,8 @@ public class Listener extends Thread{
                         break;
                     }
                     case Constaint.MESSAGE_CHAT:{
-                        if(service.panelGame != null){
-                            String chat = (String)data;
-                            service.panelGame.addMessage(chat);
-                        }
+                        String chat = (String)data;
+                        service.panelGame.addMessage(chat);
                         break;
                     }
                     case Constaint.MESSAGE_KICK_PLAYER:{
@@ -102,7 +100,10 @@ public class Listener extends Thread{
                         }
                         break;
                     }
-                    
+                    default:{
+                        System.out.println("[NotProcess] " + message.getMessageCode());
+                        break;
+                    }
                 }
             } catch (Exception e) {
             }

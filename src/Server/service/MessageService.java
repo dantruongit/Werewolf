@@ -13,7 +13,8 @@ public class MessageService {
     }
     
     public void sendMessageInRoom(Room r, Message message){
-        for(Player p: PlayerService.gI().players){
+        System.out.println("[CHAT]" + r.players);
+        for(Player p: r.players){
             if(p!= null && p.writer != null){
                 sendMessagePrivate(p, message);
             }
@@ -33,8 +34,11 @@ public class MessageService {
     public void sendMessagePrivate(Player player, Message message){
         try {
             player.writer.writeObject(message);
+            player.writer.reset();
             player.writer.flush();
+            System.out.println("[sendMessagePrivate] " + message.getMessageCode());
         } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     

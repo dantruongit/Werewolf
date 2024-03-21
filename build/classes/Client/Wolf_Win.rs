@@ -1,0 +1,3 @@
+Were_Wolf_Display.Wolf_Win$2
+Were_Wolf_Display.Wolf_Win
+Were_Wolf_Display.Wolf_Win$1
