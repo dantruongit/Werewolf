@@ -29,7 +29,6 @@ public class Constaint {
     public static final byte MESSAGE_JOIN_ROOM = -126;
     public static final byte MESSAGE_LEAVE_ROOM = -100;
     public static final byte MESSAGE_RELOAD_PLAYER = -101;
-    public static final byte MESSAGE_HAS_BANNED = -125;
     public static final byte MESSAGE_GET_CONFIG_ROLE = -103;
     //In room
     public static final byte MESSAGE_CREATE_ROOM = -102;
@@ -37,8 +36,6 @@ public class Constaint {
     public static final byte MESSAGE_GAME_STARTING = -116;
     public static final byte MESSAGE_GAME_STARTED = -119;
     public static final byte MESSAGE_CHAT = -123;
-    public static final byte MESSAGE_KICK_PLAYER = -122;
-    public static final byte MESSAGE_BAN_PLAYER = -121;
     public static final byte MESSAGE_STOP_GAME = -120;
     
     public static final byte STAGE_DISCUSSING = 127;

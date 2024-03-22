@@ -55,41 +55,9 @@ public class Listener extends Thread{
                         service.frm.changePanel(new GameRoom());
                         break;
                     }
-                    case Constaint.MESSAGE_HAS_BANNED:{
-                        gui.showMessage("Bạn đã bị ban khỏi phòng này");
-                        break;
-                    }
                     case Constaint.MESSAGE_CHAT:{
                         String chat = (String)data;
                         service.panelGame.addMessage(chat);
-                        break;
-                    }
-                    case Constaint.MESSAGE_KICK_PLAYER:{
-                        Player player = (Player)data;
-                        if(player.idPlayer == service.dataSource.player.idPlayer){
-                            gui.showMessage("Bạn đã bị kick bởi chủ phòng !");
-                            service.panelGame = null;
-                            service.dataSource.player.room = null;
-                            service.frm.changePanel(new Room_List());
-                        }
-                        else{
-                            String chat = player.namePlayer + " đã bị kick khỏi phòng !";
-                            service.panelGame.addMessage(chat);
-                        }
-                        break;
-                    }
-                    case Constaint.MESSAGE_BAN_PLAYER:{
-                        Player player = (Player)data;
-                        if(player.idPlayer == service.dataSource.player.idPlayer){
-                            gui.showMessage("Bạn đã bị ban bởi chủ phòng !");
-                            service.panelGame = null;
-                            service.dataSource.player.room = null;
-                            service.frm.changePanel(new Room_List());
-                        }
-                        else{
-                            String chat = player.namePlayer + " đã bị ban khỏi phòng !";
-                            service.panelGame.addMessage(chat);
-                        }
                         break;
                     }
                     case Constaint.MESSAGE_RELOAD_PLAYER:{

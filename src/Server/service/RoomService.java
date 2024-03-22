@@ -44,18 +44,6 @@ public class RoomService implements TemplateService{
         MessageService.gI().chat(target, "[Đã rời khỏi phòng].");
     }
     
-    public void kickPlayer(Player target, Room room, boolean isBan){
-        boolean remove = room.players.remove(target);
-        if(remove){
-            Message message = new Message(Constaint.MESSAGE_KICK_PLAYER, target);
-            if(isBan){
-                room.listBan.add(target);
-                message.setMessageCode(Constaint.MESSAGE_BAN_PLAYER);
-            }
-            MessageService.gI().sendMessageInRoom(room , message);
-        }
-    }
-    
     public Player getPlayerById(Room room, int id){
         for(Player p: room.players){
             if(p.idPlayer == id) return p;

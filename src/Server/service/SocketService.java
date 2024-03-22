@@ -37,10 +37,6 @@ public class SocketService implements TemplateService{
         }
     }
     
-    private static void debug(String t){
-        System.out.println(t);
-    }
-    
     private static class ClientHandle implements Runnable{
         private final Socket socket;
         private ObjectInputStream reader;
@@ -94,10 +90,8 @@ public class SocketService implements TemplateService{
                             break;
                         }
                         case Constaint.MESSAGE_CREATE_ROOM:{
-                            List<Role> roleConfigs = (List<Role>)message.getData();
-                            Room room = new Room();
+                            Room room = (Room)message.getData();
                             room.idRoom = Room.id++;
-                            room.configs = roleConfigs;
                             room.players.add(player);
                             room.owner = player;
                             response.setData(room);
@@ -115,14 +109,9 @@ public class SocketService implements TemplateService{
                             int id = (int)message.getData();
                             Room room = RoomService.gI().getRoomById(id);
                             if(room != null){
-                                if(!room.listBan.contains(this.player)){
-                                    room.players.add(player);
-                                    player.room = room;
-                                    response.setData(room);
-                                }
-                                else{
-                                    response.setMessageCode(Constaint.MESSAGE_HAS_BANNED);
-                                }
+                                room.players.add(player);
+                                player.room = room;
+                                response.setData(room);
                             }
                             else{
                                 response.setData(null);
@@ -161,24 +150,6 @@ public class SocketService implements TemplateService{
                         }
                         case Constaint.MESSAGE_CHAT:{
                             MessageService.gI().chat(this.player, (String)message.getData());
-                            break;
-                        }
-                        case Constaint.MESSAGE_KICK_PLAYER:{
-                            Player p = (Player)message.getData();
-                            Room room = RoomService.gI().getRoomById(this.player.room.idRoom);
-                            if(room.owner.idPlayer == this.player.idPlayer){
-                                RoomService.gI().kickPlayer(p, room, false);
-                                RoomService.gI().reloadPlayer(room);
-                            }
-                            break;
-                        }
-                        case Constaint.MESSAGE_BAN_PLAYER:{
-                            Player p = (Player)message.getData();
-                            Room room = RoomService.gI().getRoomById(this.player.room.idRoom);
-                            if(room.owner.idPlayer == this.player.idPlayer){
-                                RoomService.gI().kickPlayer(p, room, true);
-                                RoomService.gI().reloadPlayer(room);
-                            }
                             break;
                         }
                         case Constaint.MESSAGE_STOP_GAME:{
@@ -240,7 +211,7 @@ public class SocketService implements TemplateService{
     @Override
     public void init(){
         try {
-            ss = new ServerSocket(8888);
+            ss = new ServerSocket(config.Connect.port);
             ManagerService.initSuccess(nameService);
             new Thread(new ClientListener(ss)).start();
             ManagerService.initSuccess(nameService);

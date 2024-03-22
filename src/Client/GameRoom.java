@@ -139,7 +139,8 @@ public class GameRoom extends javax.swing.JPanel {
         initComponents();
         initGUI();
         Service.gI().panelGame  = this;
-        gui.changePanel(mainPanel, new PanelStatus(Service.gI().dataSource.player.room.configs));
+        Room room = Service.gI().dataSource.player.room;
+        gui.changePanel(mainPanel, new PanelStatus(room.configs, room.isRandom));
         reloadPlayers();
     }
 

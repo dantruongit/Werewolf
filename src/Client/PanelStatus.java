@@ -19,14 +19,17 @@ public class PanelStatus extends javax.swing.JPanel {
             this.roleQuantity = roleQuantity;
         }
         
-        public void set(Role conf){
+        public void set(Role conf, boolean random){
             this.roleIcon.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/icon_role" + conf.idRole + ".png", 36, 36));
-            this.roleQuantity.setText(conf.quantity + "");
+            if(!random)
+                this.roleQuantity.setText(conf.quantity + "");
+            else
+                this.roleQuantity.setText("?");
         }
         
     }
     
-    public PanelStatus(List<Role> configs) {
+    public PanelStatus(List<Role> configs, boolean isRandom) {
         initComponents();
         JLabel [] roleIcon = new JLabel[]{role0, role1, role2, role3, role4, r5,r6,r7,r8,r9};
         JLabel [] quantityIcon = new JLabel[]{c0, count1, count2, count3, count4, c5,c6,c7,c8,c9};
@@ -35,7 +38,7 @@ public class PanelStatus extends javax.swing.JPanel {
             uix[i] =  new RoleUI(roleIcon[i], quantityIcon[i]);
         int idx = 0;
         for(Role r: configs){
-            uix[idx++].set(r);
+            uix[idx++].set(r, isRandom);
         }
     }
 

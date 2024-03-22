@@ -123,6 +123,17 @@ public class Create_Room extends javax.swing.JPanel {
             count = min ;
             update();
         }
+        
+        public void setVisible(boolean flag){
+            this.btnDown.setVisible(flag);
+            this.btnUp.setVisible(flag);
+            if(flag){
+                this.quantity.setText(count + "");
+            }
+            else{
+                this.quantity.setText("?");
+            }
+        }
     }
     
     private final RoleUI[] ui  = new RoleUI[10];
@@ -216,6 +227,7 @@ public class Create_Room extends javax.swing.JPanel {
         btn92 = new javax.swing.JButton();
         btn101 = new javax.swing.JButton();
         btn102 = new javax.swing.JButton();
+        checkboxRandom = new javax.swing.JCheckBox();
 
         setLayout(null);
 
@@ -448,6 +460,17 @@ public class Create_Room extends javax.swing.JPanel {
         btn102.setText("+");
         add(btn102);
         btn102.setBounds(470, 460, 40, 22);
+
+        checkboxRandom.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        checkboxRandom.setText("Ngẫu nhiên");
+        checkboxRandom.setFocusable(false);
+        checkboxRandom.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkboxRandomActionPerformed(evt);
+            }
+        });
+        add(checkboxRandom);
+        checkboxRandom.setBounds(420, 240, 120, 24);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn11ActionPerformed
@@ -495,6 +518,7 @@ public class Create_Room extends javax.swing.JPanel {
     }//GEN-LAST:event_btn101ActionPerformed
 
     private void btnTaoPhongActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTaoPhongActionPerformed
+        Room room = new Room();
         List<Role> roleConfigs = new ArrayList<>();
         for(int i = 0; i < 10; i++){
             Role r = new Role();
@@ -502,8 +526,16 @@ public class Create_Room extends javax.swing.JPanel {
             r.quantity = ui[i].count;
             roleConfigs.add(r);
         }
-        Service.gI().sendMessage(Constaint.MESSAGE_CREATE_ROOM, roleConfigs);
+        room.configs = roleConfigs;
+        room.isRandom = checkboxRandom.isSelected();
+        Service.gI().sendMessage(Constaint.MESSAGE_CREATE_ROOM, room);
     }//GEN-LAST:event_btnTaoPhongActionPerformed
+
+    private void checkboxRandomActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxRandomActionPerformed
+        for(var u : ui){
+            u.setVisible(!checkboxRandom.isSelected());
+        }
+    }//GEN-LAST:event_checkboxRandomActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -539,6 +571,7 @@ public class Create_Room extends javax.swing.JPanel {
     private javax.swing.JButton btn92;
     private javax.swing.JButton btnTaoPhong;
     private javax.swing.JButton btnThoatPhong;
+    private javax.swing.JCheckBox checkboxRandom;
     private javax.swing.JLabel label1;
     private javax.swing.JLabel label10;
     private javax.swing.JLabel label2;

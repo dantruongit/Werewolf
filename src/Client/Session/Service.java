@@ -46,7 +46,7 @@ public class Service {
     public void joinGame(String namePlayer){
         this.dataSource.player.namePlayer = namePlayer;
         try {
-            socket = new Socket("127.0.0.1",8888);
+            socket = new Socket(config.Connect.host,config.Connect.port);
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
             ObjectOutputStream oos = new ObjectOutputStream(socket.getOutputStream());
             this.listener = new Listener();

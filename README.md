@@ -9,6 +9,7 @@
 * Create room with specific config
 * Join room
 * Chat
+* Leave room
 ## Requirements
 * Product Version: Apache NetBeans IDE 19
 * Java: 11.0.20; Java HotSpot(TM) 64-Bit Server VM 11.0.20+9-LTS-256

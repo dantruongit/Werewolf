@@ -1,6 +1,7 @@
 package Client;
 
 import Client.Session.Service;
+import config.Constaint;
 
 /**
  *
@@ -119,6 +120,7 @@ public class PlayPanel extends javax.swing.JPanel {
     }//GEN-LAST:event_btnCreateGameActionPerformed
 
     private void btnFindGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFindGameActionPerformed
+        Service.gI().sendMessage(Constaint.MESSAGE_LOAD_ROOM, null);
         Service.gI().frm.changePanel(new Room_List());
     }//GEN-LAST:event_btnFindGameActionPerformed
 
