@@ -33,9 +33,8 @@ public class Service {
     
     public DataSource dataSource = new DataSource();
     
-    public void init(){
-        //Start-listener
-        this.listener.start();
+    public void init(String username){
+        dataSource.player.namePlayer = username;
         //Join server
         this.sendMessage(Constaint.MESSAGE_JOIN_SERVER, this.dataSource.player);
         this.sendMessage(Constaint.MESSAGE_LOAD_ROOM, null);
@@ -44,8 +43,7 @@ public class Service {
         
     }
     
-    public void joinGame(String namePlayer){
-        this.dataSource.player.namePlayer = namePlayer;
+    public void joinGame(){
         try {
             socket = new Socket(config.Connect.host,config.Connect.port);
             ObjectInputStream ois = new ObjectInputStream(socket.getInputStream());
@@ -54,6 +52,8 @@ public class Service {
             this.listener.setOis(ois);
             writer = new Writer();
             writer.oos = oos;
+            //Start-listener
+            this.listener.start();
         } catch (Exception e) {
             gui.showError("Lỗi", "Không thể khởi tạo socket !", true);
         }

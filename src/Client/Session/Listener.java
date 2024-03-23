@@ -43,7 +43,12 @@ public class Listener extends Thread{
                         break;
                     }
                     case Constaint.MESSAGE_JOIN_SERVER:{
+                        if(data == null){
+                            gui.showMessage("Tên bạn chọn đã có người đặt !");
+                            break;
+                        }
                         service.dataSource.player = (Player)data;
+                        service.frm.changePanel(new HomePanel());
                         break;
                     }
                     case Constaint.MESSAGE_JOIN_ROOM:{
@@ -57,7 +62,8 @@ public class Listener extends Thread{
                     }
                     case Constaint.MESSAGE_CHAT:{
                         String chat = (String)data;
-                        service.panelGame.addMessage(chat);
+                        if(service.panelGame != null)
+                            service.panelGame.addMessage(chat);
                         break;
                     }
                     case Constaint.MESSAGE_RELOAD_PLAYER:{
@@ -95,26 +101,46 @@ public class Listener extends Thread{
                         Stage stage;
                         switch(currentStage){
                             case Constaint.STAGE_SLEEPING:{
-                                String messageStatus = Utils.Message.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
+                                String messageStatus = Utils.StringUtils.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
                                 stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_SLEEPING);
                                 service.panelGame.turnNight();
                                 service.panelGame.updateStage(stage);
                                 break;
                             }
                             case Constaint.STAGE_DISCUSSING:{
-                                String messageStatus = Utils.Message.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
+                                String messageStatus = Utils.StringUtils.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
                                 stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_DISCUSSING);
                                 service.panelGame.turnDay();
                                 service.panelGame.updateStage(stage);
                                 break;
                             }
                             case Constaint.STAGE_VOTING:{
-                                String messageStatus = Utils.Message.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
+                                String messageStatus = Utils.StringUtils.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
                                 stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_VOTING);
                                 service.panelGame.updateStage(stage);
                                 break;
                             }
+                            
                         }
+                        break;
+                    }
+                    //Message đêm gọi các role dậy
+                    case Constaint.WakeUp.ROLE_BACSI:
+                    case Constaint.WakeUp.ROLE_SOI:
+                    case Constaint.WakeUp.ROLE_SOITIENTRI:
+                    case Constaint.WakeUp.ROLE_THAYBOI:
+                    case Constaint.WakeUp.ROLE_THAYDONG:
+                    case Constaint.WakeUp.ROLE_TIENTRI:{
+                        byte idRole = service.dataSource.player.playerEffect.idRole ;
+                        String messageAlert = String.format("[Server]: Bạn là %s. Bạn có thể %s",
+                                Utils.StringUtils.getRoleNameById(idRole),Utils.StringUtils.getDescFuncRole(idRole));
+                        service.panelGame.addMessage(messageAlert);
+                        break;
+                    }
+                    //Reload lại danh sách sói votes
+                    case Constaint.MESSAGE_WOLF_VOTES:{
+                        List<Player> playerStates = (List<Player>)data;
+                        service.panelGame.reloadWolfVotes(playerStates);
                         break;
                     }
                     default:{

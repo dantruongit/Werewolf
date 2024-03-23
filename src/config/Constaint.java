@@ -14,45 +14,7 @@ public class Constaint {
     public static final byte ROLE_SOI = 8; // Phe ác
     public static final byte ROLE_SOITIENTRI = 9; // Phe không rõ
     
-    public static String getRoleNameById(byte id){
-        String res = "";
-        switch(id){
-            case ROLE_DANLANG:
-                res = "Dân làng";
-                break;
-            case ROLE_THAYBOI:
-                res = "Thầy bói";
-                break;
-            case ROLE_BACSI:
-                res = "Bác sĩ";
-                break;
-            case ROLE_BANSOI:
-                res = "Bản sơi";
-                break;
-            case ROLE_THANGNGO:
-                res = "Thằng ngố";
-                break;
-            case ROLE_XATHU:
-                res = "Xạ thủ";
-                break;
-            case ROLE_THAYDONG:
-                res = "Thầy đồng";
-                break;
-            case ROLE_TIENTRI:
-                res = "Tiên tri";
-                break;
-            case ROLE_SOI:
-                res = "Sói";
-                break;
-            case ROLE_SOITIENTRI:
-                res = "Sói tiên tri";
-                break;
-            default:
-                res = "Không xác định";
-                break;
-        }
-        return res;
-    }
+    
     
     public static final byte TEAM_WOLF = 0;
     public static final byte TEAM_VILLAGE = 1;
@@ -60,7 +22,7 @@ public class Constaint {
     
     //Time
     public static class Time{
-        public static int TIME_SLEEPING = 10000; // 25
+        public static int TIME_SLEEPING = 100000; // 25
         public static int TIME_DISCUSSING = 11000; // 30
         public static int TIME_VOTING = 12000; //20
     }
@@ -85,7 +47,6 @@ public class Constaint {
     public static final byte STAGE_CHANGE = 124;
     
     //In game
-    public static final byte MESSAGE_UPDATE_STATE_PLAYERS = -105;
     //DAY
     public static final byte MESSAGE_PICK_ROLE = -118;
     public static final byte MESSAGE_START_DISCUSSING = 1;
@@ -98,6 +59,7 @@ public class Constaint {
     public static final byte MESSAGE_VOTING_RESULT = 1;
     public static final byte MESSAGE_VOTING_JOKES_MAN = 1;
     public static final byte MESSAGE_XATHU_SHOOT = -113;
+    public static final byte MESSAGE_UPDATE_PLAYER = -93;
     //NIGHT
     //Message wake-up
     //Gọi các character dậy

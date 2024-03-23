@@ -9,7 +9,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.List;
 import payload.Message;
 
 public class SocketService implements TemplateService{
@@ -74,14 +73,18 @@ public class SocketService implements TemplateService{
                     switch(message.getMessageCode()){
                         case Constaint.MESSAGE_JOIN_SERVER:{
                             Player p = (Player)message.getData();
-                            gui.debug("Receive player " + p.toString());
-                            p.idPlayer = Player.id++;
-                            p.playerEffect = new PlayerEffect();
-                            PlayerService.gI().players.add(p);
-                            PlayerService.gI().addPlayer(p);
-                            this.player = p;
-                            this.player.writer = writer;
-                            response.setData(p);
+                            Player old = PlayerService.gI().getPlayerByUsername(p.namePlayer);
+                            if(old != null){
+                                response.setData(null);
+                            }
+                            else{
+                                p.playerEffect = new PlayerEffect();
+                                PlayerService.gI().players.add(p);
+                                PlayerService.gI().addPlayer(p);
+                                this.player = p;
+                                this.player.writer = writer;
+                                response.setData(p);
+                            }
                             writeMessage(response);
                             break;
                         }
@@ -133,7 +136,7 @@ public class SocketService implements TemplateService{
                         
                         //Note
                         case Constaint.MESSAGE_START_GAME:{
-                            if(this.player.room.owner.idPlayer == this.player.idPlayer){
+                            if(this.player.room.owner.namePlayer == this.player.namePlayer){
                                 this.player.room.startedGame = true;
                                 Game game = GameController.initNewGame(this.player.room);
                                 response.setData(game);

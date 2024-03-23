@@ -29,31 +29,15 @@ public class TemplateFrm extends javax.swing.JFrame {
         }
         initComponents();
         this.setResizable(false);
-        //String namePlayer = JOptionPane.showInputDialog("Nhập username của bạn (<13 kí tự): ");
-        String namePlayer = "123456789";
-        String regex = "^[a-z0-9]{1,12}$";
-        Pattern pattern = Pattern.compile(regex);
         
-        if(namePlayer == null || namePlayer.equals("")){
-            System.exit(0);
-        }
-        while(!pattern.matcher(namePlayer).matches()){
-            namePlayer = JOptionPane.showInputDialog("Nhập username của bạn (<13 kí tự): ");
-            if(namePlayer == null || namePlayer.equals("")){
-                System.exit(0);
-            }       
-        }
-        
-        Service.gI().joinGame(namePlayer);
-        Service.gI().init();
-
+        Service.gI().joinGame();
 
         Service.gI().frm = this;
         Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(dim.width/2-this.getSize().width/2, dim.height/2-this.getSize().height/2);
         this.setIconImage(new ImageIcon(getClass().getResource("/assets/icon.png")).getImage());
         
-        gui.changePanel(mainPanel, new PlayPanel());
+        gui.changePanel(mainPanel, new Login());
     }
     
     public void changePanel(JPanel target){

@@ -33,5 +33,8 @@ public class PlayerEffect implements Serializable{
     public boolean duocBaoVe = false;
     public boolean isDie = false;
     public int bullet = 0;
+    //Đã sử dụng lượt hồi sinh của thầy đồng chưa
     public boolean hasRevival = false;
+    //Đã sử dụng tiên tri chưa (cho cả sói tiên tri/tiên tri/thầy bói luôn)
+    public boolean hasSeenOtherRole = false;
 }

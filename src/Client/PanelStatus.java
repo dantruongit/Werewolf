@@ -20,7 +20,7 @@ public class PanelStatus extends javax.swing.JPanel {
         }
         
         public void set(Role conf, boolean random){
-            this.roleIcon.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/icon_role" + conf.idRole + ".png", 36, 36));
+            this.roleIcon.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/icon_role/icon_role" + conf.idRole + ".png", 36, 36));
             if(!random)
                 this.roleQuantity.setText(conf.quantity + "");
             else
@@ -72,27 +72,27 @@ public class PanelStatus extends javax.swing.JPanel {
         c6 = new javax.swing.JLabel();
         r7 = new javax.swing.JLabel();
 
-        role0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        role0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         c0.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         c0.setText("1");
 
-        role1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        role1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         count1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         count1.setText("1");
 
-        role2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        role2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         count2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         count2.setText("1");
 
-        role3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        role3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         count3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         count3.setText("1");
 
-        role4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        role4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         count4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         count4.setText("1");
@@ -100,12 +100,12 @@ public class PanelStatus extends javax.swing.JPanel {
         c7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         c7.setText("1");
 
-        r8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        r8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         c8.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         c8.setText("1");
 
-        r9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        r9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         c9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         c9.setText("1");
@@ -113,14 +113,14 @@ public class PanelStatus extends javax.swing.JPanel {
         c5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         c5.setText("1");
 
-        r5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        r5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
-        r6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        r6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         c6.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
         c6.setText("1");
 
-        r7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        r7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

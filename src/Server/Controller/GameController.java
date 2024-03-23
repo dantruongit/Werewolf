@@ -5,8 +5,8 @@ import Model.Player;
 import Model.PlayerEffect;
 import Model.Room;
 import Model.TaskInterval;
-import Model.Vote;
 import Server.service.MessageService;
+import Server.service.PlayerService;
 import Server.service.RoleService;
 import Server.service.RoomService;
 import config.Constaint;
@@ -14,6 +14,10 @@ import java.util.ArrayList;
 import java.util.List;
 import payload.Message;
 
+/**
+ *
+ * @author cr4zyb0t
+ */
 public class GameController {
     
     private GameController(Game game){ this.game = game; }
@@ -22,6 +26,11 @@ public class GameController {
     private byte gameState = Constaint.STAGE_SLEEPING;
     private TaskInterval task;
     
+    /**
+     * Khởi tạo 1 game mới
+     * @param room Room khởi tạo ra cái game đó
+     * @return Một đối tượng Game để gửi cho client
+     */
     public static Game initNewGame(Room room){
         Game game = new Game();
         game.idGame = Game.id++;
@@ -39,6 +48,11 @@ public class GameController {
         return game;
     }
     
+    /**
+     *
+     * @param player
+     * @return
+     */
     public static GameController gI(Player player){
         for(GameController gameController: games){
             if(gameController.game.idGame == player.game.idGame){
@@ -48,8 +62,11 @@ public class GameController {
         return null;
     }
     
-    public List<Vote> voteTickets = new ArrayList<>();
     
+    
+    /**
+     *
+     */
     public void startGame(){
         //Quay số role
         RoleService.gI().rollRoles(this.game.room, this.game);
@@ -63,7 +80,9 @@ public class GameController {
         }).start();
     }
     
-    //Hàm xử lý ban đêm: gọi các vai trò đặc biệt dậy
+    /**
+     * Hàm xử lý ban đêm: gọi các vai trò đặc biệt dậy
+     */
     private void wakeUpSpecial(){
         for(Player p: game.players){
             Message message = new Message();
@@ -104,7 +123,18 @@ public class GameController {
         }
     }
     
+    /**
+     * Hàm xử lý ban đêm: Gửi tín hiệu vote cho sói
+     */
+    private void reloadWolfVotes(){
+        Message message = new Message(Constaint.MESSAGE_WOLF_VOTES, game.players);
+        MessageService.gI().sendMessageForTeam(game.teamWolf, message, Constaint.TEAM_WOLF);
+    }
     
+    private void updateStatePlayer(Player p){
+        Message message = new Message(Constaint.MESSAGE_UPDATE_PLAYER, p);
+        MessageService.gI().sendMessageInRoom(game, message);
+    }
     
     private void calculateStage(){
         try {
@@ -128,6 +158,11 @@ public class GameController {
                 byte currentState = gameState;
                 MessageService.gI().sendMessageInRoom(game.room, 
                         new Message(Constaint.STAGE_CHANGE, currentState));
+                //Clear vote cũ
+                for(Player p: game.players){
+                    p.playerVote.voters.clear();
+                    p.playerVote.target = null;
+                }
                 //Bắt đầu xử lý các stage hiện tại 
                 switch(currentState){
                     //Thảo luận ban ngày
@@ -145,6 +180,8 @@ public class GameController {
                         delay = Constaint.Time.TIME_SLEEPING;
                         //Gọi các vai trò đặc biệt dậy
                         wakeUpSpecial();
+                        //Gửi votes cho ma sói
+                        reloadWolfVotes();
                         break;
                     }
                 }
@@ -163,78 +200,82 @@ public class GameController {
     }
     
     //Update game
-    
-    private void updateStatePlayer(Room room, List<Player> players){
-        Message message = new Message(Constaint.MESSAGE_UPDATE_STATE_PLAYERS, players);
-        MessageService.gI().sendMessageInRoom(room, message);
-    }
-    
-    private void updateStateVoting(Room room, List<Player> wolfs, List<Vote> votes){
-        Message message = new Message(Constaint.MESSAGE_UPDATE_VOTING, votes);
-        if(wolfs != null){
-            MessageService.gI().sendMessageForTeam(room, message, Constaint.TEAM_WOLF);
-        }
-        else{
-            MessageService.gI().sendMessageInRoom(room, message);
-        }
-    }
-    
     //Process voting
-    public Vote getPlayerVote(Player player){
-        for(Vote v: voteTickets){
-            if(v.playerVote == player) return v;
-        }
-        return null;
+    /**
+     * Hàm cập nhật voting cho mọi người
+     */
+    private void updateStateVoting(List<Player> dataPlayers){
+        Message message = new Message(Constaint.MESSAGE_UPDATE_VOTING, dataPlayers);
+        MessageService.gI().sendMessageInRoom(game, message);
     }
     
+    /**
+     * Hàm cập nhật voting cho sói
+     */
+    private void updateStateVotingWolfs(List<Player> dataPlayers){
+        Message message = new Message(Constaint.MESSAGE_UPDATE_VOTING, dataPlayers);
+        MessageService.gI().sendMessageForTeam(game.players, message,Constaint.TEAM_WOLF);
+    }
+    
+    /**
+     *
+     * @param player
+     * @param message
+     */
     public void processMessage(Player player, Message message){
         switch(message.getMessageCode()){
             case Constaint.MESSAGE_PLAYER_VOTES:{
-                Vote vote_ticket = (Vote)message.getData();
+                String targetVote = (String)message.getData();
                 if(player.game.gameState == Constaint.STAGE_VOTING){
-                    Vote old = getPlayerVote(player);
-                    if(old != null){
-                        voteTickets.remove(old);
+                    Player pTarget = PlayerService.gI().getPlayerByUsername(targetVote);
+                    //Nếu trước đó có vote cho ai khác thì gỡ đi
+                    if(player.playerVote.target != null){
+                        player.playerVote.target.playerVote.voters.remove(player);
                     }
-                    voteTickets.add(vote_ticket);
-                    updateStateVoting(player.room, null, voteTickets);
+                    player.playerVote.target = pTarget;
+                    pTarget.playerVote.voters.add(player);
+                    updateStateVoting(game.players);
                 }
                 break;
             }
             case Constaint.MESSAGE_PLAYER_CANCEL_VOTES:{
                 if(player.game.gameState == Constaint.STAGE_VOTING){
-                    Vote old = getPlayerVote(player);
-                    if(old != null){
-                        voteTickets.remove(old);
+                    //Nếu trước đó có vote cho ai khác thì gỡ đi
+                    if(player.playerVote.target != null){
+                        player.playerVote.target.playerVote.voters.remove(player);
+                        player.playerVote.target = null;
                     }
-                    updateStateVoting(player.room, null, voteTickets);
+                    updateStateVoting(game.players);
                 }
                 break;
             }
             case Constaint.MESSAGE_XATHU_SHOOT:{
                 Player target = (Player)message.getData();
+                //Kiểm tra đạn và vai trò
                 if(player.playerEffect.isXaThu && player.playerEffect.bullet > 0 && !target.playerEffect.isDie){
                     target.playerEffect.isDie = true;
                     player.playerEffect.bullet--;
                     player.playerEffect.isShowRole = true;
-                    updateStatePlayer(player.game.room, player.game.players);
+                    updateStatePlayer(player);
                 }
                 break;
             }
             case Constaint.MESSAGE_WOLF_VOTES:{
-                Vote vote_ticket = (Vote)message.getData();
+                String targetVote = (String)message.getData();
                 if(player.game.gameState == Constaint.STAGE_VOTING){
-                    Vote old = getPlayerVote(player);
-                    if(old != null){
-                        voteTickets.remove(old);
+                    Player pTarget = PlayerService.gI().getPlayerByUsername(targetVote);
+                    //Nếu trước đó có vote cho ai khác thì gỡ đi
+                    if(player.playerVote.target != null){
+                        player.playerVote.target.playerVote.voters.remove(player);
                     }
-                    voteTickets.add(vote_ticket);
-                    updateStateVoting(player.room, player.game.teamWolf, voteTickets);
+                    player.playerVote.target = pTarget;
+                    pTarget.playerVote.voters.add(player);
+                    updateStateVotingWolfs(game.players);
                 }
                 break;
             }
             case Constaint.MESSAGE_TIENTRI_SEE:{
-                Player pTarget = RoomService.gI().getPlayerById(player.room, (int)message.getData());
+                Player pTarget = RoomService.gI().getPlayerByUsername(player.room, (String)message.getData());
                 if(!pTarget.playerEffect.isDie){
                     MessageService.gI().sendMessagePrivate(player,
                             new Message(Constaint.MESSAGE_TIENTRI_SEE, pTarget.playerEffect.idRole));
@@ -242,7 +283,7 @@ public class GameController {
                 break;
             }
             case Constaint.MESSAGE_THAYBOI_SEE:{
-                Player pTarget = RoomService.gI().getPlayerById(player.room, (int)message.getData());
+                Player pTarget = RoomService.gI().getPlayerByUsername(player.room, (String)message.getData());
                 if(!pTarget.playerEffect.isDie){
                     PlayerEffect pE = pTarget.playerEffect;
                     byte teamTarget = pE.isWolf() ? Constaint.TEAM_WOLF : pE.isUnknown() ? Constaint.TEAM_THIRD : Constaint.TEAM_VILLAGE;
@@ -252,25 +293,39 @@ public class GameController {
                 break;
             }
             case Constaint.MESSAGE_BACSI_ACT:{
-                Player pTarget = RoomService.gI().getPlayerById(player.room, (int)message.getData());
-                if(!pTarget.playerEffect.isDie){
+                Message msg = new Message(Constaint.MESSAGE_BACSI_ACT, null);
+                Player pTarget = RoomService.gI().getPlayerByUsername(player.room, (String)message.getData());
+                if(pTarget.playerEffect.duocBaoVe){
+                    pTarget.playerEffect.duocBaoVe = false;
+                    break;
+                }
+                else if(!pTarget.playerEffect.isDie){
                     player.game.players.forEach(p ->{
                         p.playerEffect.duocBaoVe = false;
                     });
                     pTarget.playerEffect.duocBaoVe = true;
+                    msg.setData(pTarget.namePlayer);
                 }
+                MessageService.gI().sendMessagePrivate(player, msg);
                 break;
             }
             case Constaint.MESSAGE_CHAT_FROM_HELL:{
-                Message msg = new Message(Constaint.MESSAGE_CHAT_FROM_HELL, (String)message.getData());
+                String content;
+                if(player.playerEffect.isThayDong){
+                    content = "Thầy đồng: " + (String)message.getData();
+                }
+                else{
+                    content = player.namePlayer + ": " + (String)message.getData();
+                }
+                Message msg = new Message(Constaint.MESSAGE_CHAT_FROM_HELL, content);
                 MessageService.gI().sendMessagePrivate(player.game.playersDie, msg);
                 break;
             }
             case Constaint.MESSAGE_SOITIENTRI_SEE:{
-                Player pTarget = RoomService.gI().getPlayerById(player.room, (int)message.getData());
+                Player pTarget = RoomService.gI().getPlayerByUsername(player.room, (String)message.getData());
                 if(!pTarget.playerEffect.isDie){
                     MessageService.gI().sendMessagePrivate(player.game.teamWolf,
-                            new Message(Constaint.MESSAGE_TIENTRI_SEE, pTarget.playerEffect.idRole));
+                            new Message(Constaint.MESSAGE_SOITIENTRI_SEE, pTarget.playerEffect.idRole));
                 }
                 break;
             }

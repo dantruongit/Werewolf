@@ -18,13 +18,18 @@ public class PlayerService {
         if(p.room != null){
             roomid = p.room.idRoom;
         }
-        ManagerService.gI().model.addRow(new Object[]{p.idPlayer, p.namePlayer, roomid});
+        ManagerService.gI().model.addRow(new Object[]{ p.namePlayer, roomid});
     }
     
     public void reloadPlayer(){
         ManagerService.gI().model.setRowCount(0);
         for(Player p : PlayerService.gI().players){
-            ManagerService.gI().model.addRow(new Object[]{p.idPlayer, p.namePlayer, p.room.idRoom});
+            ManagerService.gI().model.addRow(new Object[]{ p.namePlayer, p.room.idRoom});
         }
+    }
+    
+    public Player getPlayerByUsername(String username){
+        for(var p : players) if(p.namePlayer.equals(username)) return p;
+        return null;
     }
 }

@@ -2,7 +2,7 @@ package Utils;
 import java.util.List;
 import java.util.Random;
 
-public class Utils {
+public class RandomUtils {
     /**
      * Hàm random 1 số trong [start;end]
      * @param start Giá trị đầu

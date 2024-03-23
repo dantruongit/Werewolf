@@ -51,26 +51,30 @@ public class RoomService implements TemplateService{
     }
     
     public void leavedPlayer(Player target, Room room){
-        room.players.removeIf(p -> p.idPlayer == target.idPlayer);
-        target.room = null;
-        if(room.owner.idPlayer == target.idPlayer && !room.startedGame){
-            removeRoom(room);
+        try {
+            room.players.removeIf(p -> p.namePlayer == target.namePlayer);
+            target.room = null;
+            if(room.owner.namePlayer == target.namePlayer && !room.startedGame){
+                removeRoom(room);
+            }
+            if(target.game != null){
+                target.game.players.removeIf(p -> p.namePlayer == target.namePlayer);
+                target.game.playersDie.removeIf(p -> p.namePlayer == target.namePlayer);
+            }
+            MessageService.gI().sendMessageInRoom(room, 
+                    new Message(Constaint.MESSAGE_CHAT, "[Server]: " + target.namePlayer + " đã rời khỏi phòng."));
+        } catch (Exception e) {
+            //e.printStackTrace();
         }
-        if(target.game != null){
-            target.game.players.removeIf(p -> p.idPlayer == target.idPlayer);
-            target.game.playersDie.removeIf(p -> p.idPlayer == target.idPlayer);
-        }
-        MessageService.gI().sendMessageInRoom(room, 
-                new Message(Constaint.MESSAGE_CHAT, "[Server]: " + target.namePlayer + " đã rời khỏi phòng."));
     }
     
     public void startGame(Room room, Game game){
         
     }
     
-    public Player getPlayerById(Room room, int id){
+    public Player getPlayerByUsername(Room room, String username){
         for(Player p: room.players){
-            if(p.idPlayer == id) return p;
+            if(p.namePlayer.equals(username)) return p;
         }
         return null;
     }

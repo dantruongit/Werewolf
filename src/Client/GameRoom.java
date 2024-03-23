@@ -10,28 +10,60 @@ import config.Constaint;
 import javax.swing.JLabel;
 import Model.*;
 import java.awt.Color;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.List;
 
 /**
  *
  * @author cr4zyb0t
  */
 public class GameRoom extends javax.swing.JPanel {
-    private final int idRoomOwner; 
+    private final String idRoomOwner; 
     private class PlayerUI{
         public int index;
-        public JLabel avatar, voteIcon, count, iconRole, name;
+        public JLabel avatar, voteIcon, iconRole, name, vote;
         public Player p;
-
+        
         public void setAvatar(JLabel avatar) {
             this.avatar = avatar;
+            // Xóa tất cả các MouseListener hiện có
+            for (MouseListener listener : this.avatar.getMouseListeners()) {
+                this.avatar.removeMouseListener(listener);
+            }
+            // Thêm một MouseListener mới
+            this.avatar.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    try {
+                        String username = getUsername();
+                        System.out.println("CLick ed " + username);
+                    } catch (Exception e1) {
+                    }
+                }
+            });
         }
 
         public void setVoteIcon(JLabel voteIcon) {
             this.voteIcon = voteIcon;
         }
-
-        public void setCount(JLabel count) {
-            this.count = count;
+        
+        /**
+         * Hàm để set cái tay chỉ số lượng người đang bỏ phiếu cho UI này
+         */
+        public void setVoteIcon(int quantity){
+            String path = Constaint.pathRoot + "/assets/hand/" + quantity + ".png";
+            var icon = gui.resizeImage(path, 60, 52);
+            this.voteIcon.setIcon(icon);
+            this.voteIcon.setVisible(true);
+        }
+        
+        /**
+         * Hàm để ẩn đi cái tay chỉ vào UI
+         */
+        public void hiddenVoteIcon(){
+            this.voteIcon.setVisible(false);
         }
 
         public void setIconRole(JLabel iconRole) {
@@ -42,16 +74,41 @@ public class GameRoom extends javax.swing.JPanel {
             this.name = name;
         }
         
+        public String getUsername(){
+            return this.name.getText().split("\\ ")[1];
+        }
+        
+        public void setVote(JLabel vote){
+            this.vote = vote;
+        }
+        
+        /**
+         * Hàm để set cái bảng cầm tay chỉ đang vote ai ấy
+         */
+        public void setVote(int indexPlayer){
+            String path = Constaint.pathRoot + "/assets/hand_table/hand_vote_" + indexPlayer + ".png";
+            var icon = gui.resizeImage(path, 70, 30);
+            this.vote.setIcon(icon);
+            this.vote.setVisible(true);
+        }
+        /**
+         * Hàm để ẩn đi cái bảng cầm tay 
+         */
+        public void hiddenVote(){
+            this.vote.setVisible(false);
+        }
+        
         public void loadPlayer(Player p){
             this.p = p;
-            int avatarId  = Utils.Utils.nextInt(1, 4);
+            int avatarId  = Utils.RandomUtils.nextInt(1, 4);
             avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar" + avatarId+ ".jpg", 75, 75));
-            
+            String currentNamePlayer = Service.gI().dataSource.player.namePlayer;
             name.setText(index + " " + p.namePlayer);
-            if(p.idPlayer == Service.gI().dataSource.player.idPlayer){
+            if(p.namePlayer.equals(currentNamePlayer)){
                 name.setForeground(Color.red);
+                thisUI = this;
             }
-            if(idRoomOwner == p.idPlayer){
+            if(idRoomOwner.equals(p.namePlayer)){
                 String path = Constaint.pathRoot + "/assets/crown.png";
                 System.out.println(path);
                 this.iconRole.setIcon(gui.resizeImage
@@ -60,31 +117,51 @@ public class GameRoom extends javax.swing.JPanel {
             }
         }
         
+        public void resetUI(){
+            
+        }
+        
     }
+    private PlayerUI thisUI;
     
     private final PlayerUI[] playersUI = new PlayerUI[9];
     
+    private PlayerUI getUIbyUserName(String username){
+        for(var u : playersUI){
+            if(u.getUsername().equals(username)) return u;
+        }
+        return null;
+    }
+    
     private void initGUI(){
+        JLabel[] votes = new JLabel[]{vote1, vote2, vote3, vote4, vote5, vote6, vote7, vote8, vote9};
+        JLabel[] avatars = new JLabel[]{
+            avatar0, avatar1, avatar2, avatar3, avatar4, avatar5, avatar6, avatar7, avatar8
+        };
+        JLabel[] voteicons = new JLabel[]{
+            hand0, hand1, hand2, hand3, hand4, hand5, hand6, hand7, hand8
+        };
+        JLabel[] iconroles = new JLabel[]{
+            roleUser0, roleUser1, roleUser2, roleUser3, roleUser4, roleUser5, roleUser6, roleUser7, roleUser8
+        };
+        JLabel[] names = new JLabel[]{
+            name0, name1, name2, name3, name4, name5, name6, name7, name8
+        };
+
         for(int i = 0; i < 9;i++){
             playersUI[i] = new PlayerUI();
-            playersUI[i].index = i+1;
-        }
-        
-        playersUI[0].setAvatar(avatar0);playersUI[0].setVoteIcon(hand0);playersUI[0].setCount(c0);playersUI[0].setIconRole(roleUser0);playersUI[0].setName(name0);
-        playersUI[1].setAvatar(avatar1);playersUI[1].setVoteIcon(hand1);playersUI[1].setCount(c1);playersUI[1].setIconRole(roleUser1);playersUI[1].setName(name1);
-        playersUI[2].setAvatar(avatar2);playersUI[2].setVoteIcon(hand2);playersUI[2].setCount(c2);playersUI[2].setIconRole(roleUser2);playersUI[2].setName(name2);
-        playersUI[3].setAvatar(avatar3);playersUI[3].setVoteIcon(hand3);playersUI[3].setCount(c3);playersUI[3].setIconRole(roleUser3);playersUI[3].setName(name3);
-        playersUI[4].setAvatar(avatar4);playersUI[4].setVoteIcon(hand4);playersUI[4].setCount(c4);playersUI[4].setIconRole(roleUser4);playersUI[4].setName(name4);
-        playersUI[5].setAvatar(avatar5);playersUI[5].setVoteIcon(hand5);playersUI[5].setCount(c5);playersUI[5].setIconRole(roleUser5);playersUI[5].setName(name5);
-        playersUI[6].setAvatar(avatar6);playersUI[6].setVoteIcon(hand6);playersUI[6].setCount(c6);playersUI[6].setIconRole(roleUser6);playersUI[6].setName(name6);
-        playersUI[7].setAvatar(avatar7);playersUI[7].setVoteIcon(hand7);playersUI[7].setCount(c7);playersUI[7].setIconRole(roleUser7);playersUI[7].setName(name7);
-        playersUI[8].setAvatar(avatar8);playersUI[8].setVoteIcon(hand8);playersUI[8].setCount(c8);playersUI[8].setIconRole(roleUser8);playersUI[8].setName(name8);
-        for(int i = 0; i < 9;i++){
-            playersUI[i].avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar_unknown.jpg", 75, 75));
-            playersUI[i].name.setText("");
-            playersUI[i].count.setVisible(false);
-            playersUI[i].iconRole.setVisible(false);
-            playersUI[i].voteIcon.setVisible(false);
+            PlayerUI pU = playersUI[i];
+            pU.index = i+1;
+            pU.setVote(votes[i]);
+            pU.setAvatar(avatars[i]);
+            pU.setVoteIcon(voteicons[i]);
+            pU.setIconRole(iconroles[i]);
+            pU.setName(names[i]);
+            pU.avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar_unknown.jpg", 75, 75));
+            pU.name.setText("");
+            pU.iconRole.setVisible(false);
+            pU.voteIcon.setVisible(false);
+            pU.vote.setVisible(false);
         }
         turnDay();
     }
@@ -92,7 +169,6 @@ public class GameRoom extends javax.swing.JPanel {
     private void resetUI(PlayerUI ui){
         ui.avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar_unknown.jpg", 75, 75));
         ui.name.setText("");
-        ui.count.setVisible(false);
         ui.iconRole.setVisible(false);
         ui.voteIcon.setVisible(false);
     }
@@ -152,6 +228,33 @@ public class GameRoom extends javax.swing.JPanel {
         btnSend.setBackground(day);
     }
     
+    public void reloadWolfVotes(List<Player> playerStates){
+        for(var p: playerStates){
+            String username = p.namePlayer;
+            PlayerVote pV = p.playerVote;
+            for(PlayerUI ui: playersUI){
+                //Trong trường hợp cái UI đó đại diện cho cái Vote đang duyệt
+                if(ui.getUsername().equals(username)){
+                    //Set cái tay chỉ vào UI
+                    if(!pV.voters.isEmpty())
+                        ui.setVoteIcon(pV.voters.size());
+                    else
+                        ui.hiddenVoteIcon();
+                    
+                    //Set người đang bỏ phiếu
+                    if(pV.target != null){
+                        int indexPlayer = getUIbyUserName(pV.target.namePlayer).index;
+                        ui.setVote(indexPlayer);
+                    }
+                    else{
+                        ui.hiddenVote();
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    
     /**
      * Xử lý nhẹ khi game bắt đầu
      * @param flag status game đã bắt đầu hay chưa
@@ -169,16 +272,16 @@ public class GameRoom extends javax.swing.JPanel {
         new Thread(()->{
             PlayerUI uj = null;
             for(PlayerUI u: playersUI){
-                if(u.p != null && u.p.idPlayer == Service.gI().dataSource.player.idPlayer){
+                if(u.p != null && u.p.namePlayer.equals(Service.gI().dataSource.player.namePlayer)) {
                     uj = u;
                 }
             }
             try {
                 for(int i = 0 ; i < 30;i++){
                     Thread.sleep(50);
-                    byte rd = (byte)Utils.Utils.nextInt(0, 9);
+                    byte rd = (byte)Utils.RandomUtils.nextInt(0, 9);
                     if(uj != null){
-                        String path = Constaint.pathRoot + "/assets/icon_role" + rd + ".png";
+                        String path = Constaint.pathRoot + "/assets/icon_role/icon_role" + rd + ".png";
                         uj.iconRole.setIcon(gui.resizeImage(path, 36, 36));
                         uj.iconRole.setVisible(true);
                     }
@@ -186,10 +289,10 @@ public class GameRoom extends javax.swing.JPanel {
             } catch (Exception e) {
             }
             if(uj != null){
-                String path = Constaint.pathRoot + "/assets/icon_role" + idRole + ".png";
+                String path = Constaint.pathRoot + "/assets/icon_role/icon_role" + idRole + ".png";
                 uj.iconRole.setIcon(gui.resizeImage(path, 36, 36));
             }
-            addMessage("Bạn đã nhận được vai trò " + Constaint.getRoleNameById(idRole));
+            addMessage("Bạn đã nhận được vai trò " + Utils.StringUtils.getRoleNameById(idRole));
         }).start();
     }
     
@@ -202,8 +305,8 @@ public class GameRoom extends javax.swing.JPanel {
         Service.gI().panelGame  = this;
         Player player = Service.gI().dataSource.player;
         Room room = player.room;
-        this.idRoomOwner = room.owner.idPlayer;
-        if(room.owner.idPlayer != player.idPlayer){
+        this.idRoomOwner = room.owner.namePlayer;
+        if(!room.owner.namePlayer.equals(player.namePlayer)){
             btnStart.setVisible(false);
         }
         gui.changePanel(mainPanel, new PanelStatus(room.configs, room.isRandom));
@@ -219,64 +322,16 @@ public class GameRoom extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        jPanel1 = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel9 = new javax.swing.JLabel();
-        jLabel10 = new javax.swing.JLabel();
-        jLabel1 = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jTextArea1 = new javax.swing.JTextArea();
-        jTextField1 = new javax.swing.JTextField();
-        jButton2 = new javax.swing.JButton();
-        jLabel11 = new javax.swing.JLabel();
-        jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
-        jLabel14 = new javax.swing.JLabel();
-        jLabel15 = new javax.swing.JLabel();
-        jLabel16 = new javax.swing.JLabel();
-        jLabel17 = new javax.swing.JLabel();
-        jLabel18 = new javax.swing.JLabel();
-        jLabel19 = new javax.swing.JLabel();
-        jLabel20 = new javax.swing.JLabel();
-        jLabel22 = new javax.swing.JLabel();
-        jLabel23 = new javax.swing.JLabel();
-        jLabel24 = new javax.swing.JLabel();
-        jLabel25 = new javax.swing.JLabel();
-        jLabel26 = new javax.swing.JLabel();
-        jLabel27 = new javax.swing.JLabel();
-        jLabel28 = new javax.swing.JLabel();
-        jLabel29 = new javax.swing.JLabel();
-        jLabel30 = new javax.swing.JLabel();
-        jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jLabel21 = new javax.swing.JLabel();
-        jLabel31 = new javax.swing.JLabel();
-        jLabel32 = new javax.swing.JLabel();
-        jLabel33 = new javax.swing.JLabel();
-        jLabel34 = new javax.swing.JLabel();
-        jLabel35 = new javax.swing.JLabel();
-        jLabel36 = new javax.swing.JLabel();
-        jLabel37 = new javax.swing.JLabel();
-        jLabel38 = new javax.swing.JLabel();
-        jLabel39 = new javax.swing.JLabel();
-        jLabel40 = new javax.swing.JLabel();
-        jLabel41 = new javax.swing.JLabel();
-        jLabel42 = new javax.swing.JLabel();
-        jLabel43 = new javax.swing.JLabel();
-        jLabel44 = new javax.swing.JLabel();
-        jLabel45 = new javax.swing.JLabel();
-        jLabel46 = new javax.swing.JLabel();
-        jLabel47 = new javax.swing.JLabel();
-        jLabel48 = new javax.swing.JLabel();
-        jLabel49 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
+        vote9 = new javax.swing.JLabel();
+        vote3 = new javax.swing.JLabel();
+        vote1 = new javax.swing.JLabel();
+        vote2 = new javax.swing.JLabel();
+        vote4 = new javax.swing.JLabel();
+        vote5 = new javax.swing.JLabel();
+        vote6 = new javax.swing.JLabel();
+        vote7 = new javax.swing.JLabel();
+        vote8 = new javax.swing.JLabel();
         jLabel50 = new javax.swing.JLabel();
         btnExit = new javax.swing.JButton();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -289,300 +344,88 @@ public class GameRoom extends javax.swing.JPanel {
         avatar0 = new javax.swing.JLabel();
         name0 = new javax.swing.JLabel();
         roleUser0 = new javax.swing.JLabel();
-        c0 = new javax.swing.JLabel();
         hand1 = new javax.swing.JLabel();
         avatar1 = new javax.swing.JLabel();
         name1 = new javax.swing.JLabel();
         roleUser1 = new javax.swing.JLabel();
-        c1 = new javax.swing.JLabel();
         hand2 = new javax.swing.JLabel();
         avatar2 = new javax.swing.JLabel();
         name2 = new javax.swing.JLabel();
         roleUser2 = new javax.swing.JLabel();
-        c2 = new javax.swing.JLabel();
         hand3 = new javax.swing.JLabel();
         avatar3 = new javax.swing.JLabel();
         name3 = new javax.swing.JLabel();
         roleUser3 = new javax.swing.JLabel();
-        c3 = new javax.swing.JLabel();
         hand4 = new javax.swing.JLabel();
         avatar4 = new javax.swing.JLabel();
         name4 = new javax.swing.JLabel();
         roleUser4 = new javax.swing.JLabel();
-        c4 = new javax.swing.JLabel();
         hand5 = new javax.swing.JLabel();
         avatar5 = new javax.swing.JLabel();
         name5 = new javax.swing.JLabel();
         roleUser5 = new javax.swing.JLabel();
-        c5 = new javax.swing.JLabel();
         hand6 = new javax.swing.JLabel();
         avatar6 = new javax.swing.JLabel();
         name6 = new javax.swing.JLabel();
         roleUser6 = new javax.swing.JLabel();
-        c6 = new javax.swing.JLabel();
         hand7 = new javax.swing.JLabel();
         avatar7 = new javax.swing.JLabel();
         name7 = new javax.swing.JLabel();
         roleUser7 = new javax.swing.JLabel();
-        c7 = new javax.swing.JLabel();
         hand8 = new javax.swing.JLabel();
         avatar8 = new javax.swing.JLabel();
         name8 = new javax.swing.JLabel();
         roleUser8 = new javax.swing.JLabel();
-        c8 = new javax.swing.JLabel();
         mainPanel = new javax.swing.JPanel();
-
-        jPanel1.setForeground(new java.awt.Color(255, 255, 255));
-        jPanel1.setMinimumSize(new java.awt.Dimension(860, 502));
-        jPanel1.setLayout(null);
-        jPanel1.add(jLabel2);
-        jLabel2.setBounds(148, 73, 102, 0);
-
-        jLabel3.setText("jLabel2");
-        jPanel1.add(jLabel3);
-        jLabel3.setBounds(30, 208, 100, 16);
-
-        jLabel4.setText("jLabel2");
-        jPanel1.add(jLabel4);
-        jLabel4.setBounds(156, 208, 100, 16);
-
-        jLabel5.setText("jLabel2");
-        jPanel1.add(jLabel5);
-        jLabel5.setBounds(30, 73, 100, 16);
-
-        jLabel6.setText("jLabel2");
-        jPanel1.add(jLabel6);
-        jLabel6.setBounds(30, 342, 100, 16);
-
-        jLabel7.setText("jLabel2");
-        jPanel1.add(jLabel7);
-        jLabel7.setBounds(268, 208, 100, 16);
-
-        jLabel8.setText("jLabel2");
-        jPanel1.add(jLabel8);
-        jLabel8.setBounds(268, 342, 100, 16);
-
-        jLabel9.setText("jLabel2");
-        jPanel1.add(jLabel9);
-        jLabel9.setBounds(268, 73, 100, 16);
-
-        jLabel10.setText("jLabel2");
-        jPanel1.add(jLabel10);
-        jLabel10.setBounds(150, 342, 100, 16);
-
-        jLabel1.setText("Chủ phòng");
-        jPanel1.add(jLabel1);
-        jLabel1.setBounds(30, 48, 60, 16);
-
-        jButton1.setText("Thoát phòng");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton1);
-        jButton1.setBounds(6, 6, 120, 32);
-
-        jTextArea1.setColumns(20);
-        jTextArea1.setRows(5);
-        jScrollPane1.setViewportView(jTextArea1);
-
-        jPanel1.add(jScrollPane1);
-        jScrollPane1.setBounds(401, 73, 455, 280);
-
-        jTextField1.setText("Chat here");
-        jPanel1.add(jTextField1);
-        jTextField1.setBounds(401, 371, 337, 59);
-
-        jButton2.setText("Gửi");
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton2);
-        jButton2.setBounds(744, 371, 112, 59);
-
-        jLabel11.setText("Tên");
-        jPanel1.add(jLabel11);
-        jLabel11.setBounds(30, 180, 19, 16);
-
-        jLabel12.setText("Tên");
-        jPanel1.add(jLabel12);
-        jLabel12.setBounds(148, 180, 19, 16);
-
-        jLabel13.setText("Tên");
-        jPanel1.add(jLabel13);
-        jLabel13.setBounds(262, 180, 19, 16);
-
-        jLabel14.setText("Tên");
-        jPanel1.add(jLabel14);
-        jLabel14.setBounds(30, 312, 19, 24);
-
-        jLabel15.setText("Tên");
-        jPanel1.add(jLabel15);
-        jLabel15.setBounds(150, 312, 19, 24);
-
-        jLabel16.setText("Tên");
-        jPanel1.add(jLabel16);
-        jLabel16.setBounds(268, 312, 19, 24);
-
-        jLabel17.setText("Tên");
-        jPanel1.add(jLabel17);
-        jLabel17.setBounds(30, 449, 19, 24);
-
-        jLabel18.setText("Tên");
-        jPanel1.add(jLabel18);
-        jLabel18.setBounds(150, 449, 19, 24);
-
-        jLabel19.setText("Tên");
-        jPanel1.add(jLabel19);
-        jLabel19.setBounds(268, 449, 19, 24);
-        jPanel1.add(jLabel20);
-        jLabel20.setBounds(385, 30, 0, 0);
-
-        jLabel22.setText("role");
-        jPanel1.add(jLabel22);
-        jLabel22.setBounds(109, 180, 20, 16);
-
-        jLabel23.setText("role");
-        jPanel1.add(jLabel23);
-        jLabel23.setBounds(235, 180, 20, 16);
-
-        jLabel24.setText("role");
-        jPanel1.add(jLabel24);
-        jLabel24.setBounds(347, 180, 20, 16);
-
-        jLabel25.setText("role");
-        jPanel1.add(jLabel25);
-        jLabel25.setBounds(347, 316, 20, 16);
-
-        jLabel26.setText("role");
-        jPanel1.add(jLabel26);
-        jLabel26.setBounds(109, 316, 20, 16);
-
-        jLabel27.setText("role");
-        jPanel1.add(jLabel27);
-        jLabel27.setBounds(229, 316, 20, 16);
-
-        jLabel28.setText("role");
-        jPanel1.add(jLabel28);
-        jLabel28.setBounds(347, 453, 20, 16);
-
-        jLabel29.setText("role");
-        jPanel1.add(jLabel29);
-        jLabel29.setBounds(109, 453, 20, 16);
-
-        jLabel30.setText("role");
-        jPanel1.add(jLabel30);
-        jLabel30.setBounds(229, 453, 20, 16);
-
-        jButton3.setText("Bắt Đầu");
-        jPanel1.add(jButton3);
-        jButton3.setBounds(673, 449, 165, 53);
-
-        jButton4.setText("Chỉnh sửa role");
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
-        jPanel1.add(jButton4);
-        jButton4.setBounds(401, 450, 138, 52);
-
-        jLabel21.setText("Sói");
-        jPanel1.add(jLabel21);
-        jLabel21.setBounds(233, 7, 16, 16);
-
-        jLabel31.setText("Dân làng");
-        jPanel1.add(jLabel31);
-        jLabel31.setBounds(303, 7, 47, 16);
-
-        jLabel32.setText("Bảo vệ");
-        jPanel1.add(jLabel32);
-        jLabel32.setBounds(385, 7, 35, 16);
-
-        jLabel33.setText("Tiên Tri");
-        jPanel1.add(jLabel33);
-        jLabel33.setBounds(498, 8, 38, 16);
-
-        jLabel34.setText("Kẻ lây nhiễm");
-        jPanel1.add(jLabel34);
-        jLabel34.setBounds(577, 7, 68, 16);
-
-        jLabel35.setText("Sói Tri");
-        jPanel1.add(jLabel35);
-        jLabel35.setBounds(233, 37, 32, 16);
-
-        jLabel36.setText("Xạ thủ");
-        jPanel1.add(jLabel36);
-        jLabel36.setBounds(303, 37, 34, 16);
-
-        jLabel37.setText("Thầy Đồng");
-        jPanel1.add(jLabel37);
-        jLabel37.setBounds(385, 37, 57, 16);
-
-        jLabel38.setText("Thằng hề");
-        jPanel1.add(jLabel38);
-        jLabel38.setBounds(498, 37, 49, 16);
-
-        jLabel39.setText("Role 10");
-        jPanel1.add(jLabel39);
-        jLabel39.setBounds(577, 37, 38, 16);
-
-        jLabel40.setText("0");
-        jLabel40.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel40);
-        jLabel40.setBounds(209, 6, 18, 18);
-
-        jLabel41.setText("0");
-        jLabel41.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel41);
-        jLabel41.setBounds(209, 36, 18, 18);
-
-        jLabel42.setText("0");
-        jLabel42.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel42);
-        jLabel42.setBounds(279, 6, 18, 18);
-
-        jLabel43.setText("0");
-        jLabel43.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel43);
-        jLabel43.setBounds(279, 36, 18, 18);
-
-        jLabel44.setText("0");
-        jLabel44.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel44);
-        jLabel44.setBounds(363, 6, 18, 18);
-
-        jLabel45.setText("0");
-        jLabel45.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel45);
-        jLabel45.setBounds(361, 36, 18, 18);
-
-        jLabel46.setText("0");
-        jLabel46.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel46);
-        jLabel46.setBounds(479, 6, 18, 18);
-
-        jLabel47.setText("0");
-        jLabel47.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel47);
-        jLabel47.setBounds(479, 36, 18, 18);
-
-        jLabel48.setText("0");
-        jLabel48.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel48);
-        jLabel48.setBounds(553, 6, 18, 18);
-
-        jLabel49.setText("0");
-        jLabel49.setBorder(new javax.swing.border.LineBorder(new java.awt.Color(255, 51, 51), 1, true));
-        jPanel1.add(jLabel49);
-        jLabel49.setBounds(553, 36, 18, 18);
 
         jPanel2.setForeground(new java.awt.Color(255, 255, 255));
         jPanel2.setMinimumSize(new java.awt.Dimension(860, 502));
         jPanel2.setLayout(null);
+
+        vote9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote9);
+        vote9.setBounds(290, 440, 70, 40);
+
+        vote3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote3);
+        vote3.setBounds(290, 130, 70, 40);
+
+        vote1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote1);
+        vote1.setBounds(50, 130, 70, 40);
+
+        vote2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote2);
+        vote2.setBounds(170, 130, 70, 40);
+
+        vote4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote4);
+        vote4.setBounds(50, 290, 70, 40);
+
+        vote5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote5);
+        vote5.setBounds(170, 290, 70, 40);
+
+        vote6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote6);
+        vote6.setBounds(290, 290, 70, 40);
+
+        vote7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote7);
+        vote7.setBounds(50, 440, 70, 40);
+
+        vote8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        vote8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand_table/hand_vote.png"))); // NOI18N
+        jPanel2.add(vote8);
+        vote8.setBounds(170, 440, 70, 40);
         jPanel2.add(jLabel50);
         jLabel50.setBounds(148, 73, 102, 0);
 
@@ -634,7 +477,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(btnStart);
         btnStart.setBounds(790, 20, 60, 40);
 
-        hand0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand0);
         hand0.setBounds(20, 80, 60, 40);
 
@@ -648,17 +491,11 @@ public class GameRoom extends javax.swing.JPanel {
         name0.setBounds(40, 170, 100, 16);
 
         roleUser0.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser0);
         roleUser0.setBounds(70, 40, 40, 30);
 
-        c0.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c0.setForeground(new java.awt.Color(255, 51, 51));
-        c0.setText("10");
-        jPanel2.add(c0);
-        c0.setBounds(10, 60, 20, 20);
-
-        hand1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand1);
         hand1.setBounds(140, 80, 60, 40);
 
@@ -672,17 +509,11 @@ public class GameRoom extends javax.swing.JPanel {
         name1.setBounds(150, 170, 100, 16);
 
         roleUser1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser1);
         roleUser1.setBounds(190, 40, 40, 30);
 
-        c1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c1.setForeground(new java.awt.Color(255, 51, 51));
-        c1.setText("10");
-        jPanel2.add(c1);
-        c1.setBounds(130, 60, 20, 20);
-
-        hand2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand2);
         hand2.setBounds(260, 80, 60, 40);
 
@@ -696,17 +527,11 @@ public class GameRoom extends javax.swing.JPanel {
         name2.setBounds(270, 170, 100, 16);
 
         roleUser2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser2);
         roleUser2.setBounds(310, 40, 40, 30);
 
-        c2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c2.setForeground(new java.awt.Color(255, 51, 51));
-        c2.setText("10");
-        jPanel2.add(c2);
-        c2.setBounds(250, 60, 20, 20);
-
-        hand3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand3);
         hand3.setBounds(20, 240, 60, 40);
 
@@ -720,17 +545,11 @@ public class GameRoom extends javax.swing.JPanel {
         name3.setBounds(40, 330, 100, 16);
 
         roleUser3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser3);
         roleUser3.setBounds(70, 200, 40, 30);
 
-        c3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c3.setForeground(new java.awt.Color(255, 51, 51));
-        c3.setText("10");
-        jPanel2.add(c3);
-        c3.setBounds(20, 220, 20, 20);
-
-        hand4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand4);
         hand4.setBounds(140, 240, 60, 40);
 
@@ -744,17 +563,11 @@ public class GameRoom extends javax.swing.JPanel {
         name4.setBounds(160, 330, 100, 16);
 
         roleUser4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser4);
         roleUser4.setBounds(190, 200, 40, 30);
 
-        c4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c4.setForeground(new java.awt.Color(255, 51, 51));
-        c4.setText("10");
-        jPanel2.add(c4);
-        c4.setBounds(140, 220, 20, 20);
-
-        hand5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand5);
         hand5.setBounds(260, 240, 60, 40);
 
@@ -768,17 +581,11 @@ public class GameRoom extends javax.swing.JPanel {
         name5.setBounds(280, 330, 100, 16);
 
         roleUser5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser5);
         roleUser5.setBounds(310, 200, 40, 30);
 
-        c5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c5.setForeground(new java.awt.Color(255, 51, 51));
-        c5.setText("10");
-        jPanel2.add(c5);
-        c5.setBounds(260, 220, 20, 20);
-
-        hand6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand6);
         hand6.setBounds(20, 390, 60, 40);
 
@@ -792,17 +599,11 @@ public class GameRoom extends javax.swing.JPanel {
         name6.setBounds(40, 480, 100, 16);
 
         roleUser6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser6);
         roleUser6.setBounds(70, 350, 40, 30);
 
-        c6.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c6.setForeground(new java.awt.Color(255, 51, 51));
-        c6.setText("10");
-        jPanel2.add(c6);
-        c6.setBounds(20, 370, 20, 20);
-
-        hand7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand7);
         hand7.setBounds(140, 390, 60, 40);
 
@@ -816,17 +617,11 @@ public class GameRoom extends javax.swing.JPanel {
         name7.setBounds(160, 480, 100, 16);
 
         roleUser7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser7);
         roleUser7.setBounds(190, 350, 40, 30);
 
-        c7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c7.setForeground(new java.awt.Color(255, 51, 51));
-        c7.setText("10");
-        jPanel2.add(c7);
-        c7.setBounds(140, 370, 20, 20);
-
-        hand8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand.png"))); // NOI18N
+        hand8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/hand/hand.png"))); // NOI18N
         jPanel2.add(hand8);
         hand8.setBounds(260, 390, 60, 40);
 
@@ -840,15 +635,9 @@ public class GameRoom extends javax.swing.JPanel {
         name8.setBounds(280, 480, 100, 16);
 
         roleUser8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        roleUser8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        roleUser8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser8);
         roleUser8.setBounds(310, 350, 40, 30);
-
-        c8.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        c8.setForeground(new java.awt.Color(255, 51, 51));
-        c8.setText("10");
-        jPanel2.add(c8);
-        c8.setBounds(260, 370, 20, 20);
 
         mainPanel.setBackground(new java.awt.Color(51, 51, 51));
 
@@ -872,37 +661,16 @@ public class GameRoom extends javax.swing.JPanel {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 860, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, 860, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGap(0, 502, Short.MAX_VALUE)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addGroup(layout.createSequentialGroup()
-                    .addContainerGap()
-                    .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 502, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton2ActionPerformed
-
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
     private void btnSendActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSendActionPerformed
         sendMessage();
     }//GEN-LAST:event_btnSendActionPerformed
@@ -944,15 +712,6 @@ public class GameRoom extends javax.swing.JPanel {
     private javax.swing.JButton btnExit;
     private javax.swing.JButton btnSend;
     private javax.swing.JButton btnStart;
-    private javax.swing.JLabel c0;
-    private javax.swing.JLabel c1;
-    private javax.swing.JLabel c2;
-    private javax.swing.JLabel c3;
-    private javax.swing.JLabel c4;
-    private javax.swing.JLabel c5;
-    private javax.swing.JLabel c6;
-    private javax.swing.JLabel c7;
-    private javax.swing.JLabel c8;
     private javax.swing.JLabel hand0;
     private javax.swing.JLabel hand1;
     private javax.swing.JLabel hand2;
@@ -962,67 +721,10 @@ public class GameRoom extends javax.swing.JPanel {
     private javax.swing.JLabel hand6;
     private javax.swing.JLabel hand7;
     private javax.swing.JLabel hand8;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel17;
-    private javax.swing.JLabel jLabel18;
-    private javax.swing.JLabel jLabel19;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel20;
-    private javax.swing.JLabel jLabel21;
-    private javax.swing.JLabel jLabel22;
-    private javax.swing.JLabel jLabel23;
-    private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel26;
-    private javax.swing.JLabel jLabel27;
-    private javax.swing.JLabel jLabel28;
-    private javax.swing.JLabel jLabel29;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel30;
-    private javax.swing.JLabel jLabel31;
-    private javax.swing.JLabel jLabel32;
-    private javax.swing.JLabel jLabel33;
-    private javax.swing.JLabel jLabel34;
-    private javax.swing.JLabel jLabel35;
-    private javax.swing.JLabel jLabel36;
-    private javax.swing.JLabel jLabel37;
-    private javax.swing.JLabel jLabel38;
-    private javax.swing.JLabel jLabel39;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel40;
-    private javax.swing.JLabel jLabel41;
-    private javax.swing.JLabel jLabel42;
-    private javax.swing.JLabel jLabel43;
-    private javax.swing.JLabel jLabel44;
-    private javax.swing.JLabel jLabel45;
-    private javax.swing.JLabel jLabel46;
-    private javax.swing.JLabel jLabel47;
-    private javax.swing.JLabel jLabel48;
-    private javax.swing.JLabel jLabel49;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel50;
-    private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel69;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
-    private javax.swing.JTextArea jTextArea1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JPanel mainPanel;
     private javax.swing.JLabel name0;
     private javax.swing.JLabel name1;
@@ -1044,5 +746,14 @@ public class GameRoom extends javax.swing.JPanel {
     private javax.swing.JLabel roleUser8;
     private javax.swing.JTextArea txtChat;
     private javax.swing.JTextField txtInput;
+    private javax.swing.JLabel vote1;
+    private javax.swing.JLabel vote2;
+    private javax.swing.JLabel vote3;
+    private javax.swing.JLabel vote4;
+    private javax.swing.JLabel vote5;
+    private javax.swing.JLabel vote6;
+    private javax.swing.JLabel vote7;
+    private javax.swing.JLabel vote8;
+    private javax.swing.JLabel vote9;
     // End of variables declaration//GEN-END:variables
 }

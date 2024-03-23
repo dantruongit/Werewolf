@@ -4,7 +4,7 @@ import Model.Game;
 import Model.Role;
 import Model.Player;
 import Model.Room;
-import Utils.Utils;
+import Utils.RandomUtils;
 import config.Constaint;
 import java.util.ArrayList;
 import java.util.List;
@@ -181,7 +181,7 @@ public class RoleService implements TemplateService{
      */
     public void sendRoleToPlayer(List<Integer> arr, Game game){
         for(Player p: game.players){
-            int idRole = Utils.getRandom(arr);
+            int idRole = RandomUtils.getRandom(arr);
             arr.remove(idRole);
             RoleService.gI().setPropertyRole(p, idRole);
             MessageService.gI().sendMessagePrivate(p, 
@@ -207,7 +207,7 @@ public class RoleService implements TemplateService{
         arr.add((int)Constaint.ROLE_SOI);
         arr.add((int)Constaint.ROLE_SOI);
         //Trúng thưởng thêm sói
-        boolean hasExtraWolf = Utils.isTrue(50, 100);
+        boolean hasExtraWolf = RandomUtils.isTrue(50, 100);
         if(hasExtraWolf){
             arr.add((int)Constaint.ROLE_SOI);
             count = 5;
@@ -221,7 +221,7 @@ public class RoleService implements TemplateService{
         }
         //Random các role còn lại
         while(count > 0){
-            int idRole = Utils.getRandom(rolesVillage);
+            int idRole = RandomUtils.getRandom(rolesVillage);
             int quantity = Math.min(Math.max(getRoleConfigById((byte)idRole).requiredMin, 1), count);
             count -= quantity;
             for(int i = 0 ; i < quantity ; i++){
