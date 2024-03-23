@@ -76,6 +76,7 @@ public class SocketService implements TemplateService{
                             Player p = (Player)message.getData();
                             gui.debug("Receive player " + p.toString());
                             p.idPlayer = Player.id++;
+                            p.playerEffect = new PlayerEffect();
                             PlayerService.gI().players.add(p);
                             PlayerService.gI().addPlayer(p);
                             this.player = p;
@@ -132,19 +133,11 @@ public class SocketService implements TemplateService{
                         
                         //Note
                         case Constaint.MESSAGE_START_GAME:{
-                            if(this.player.room.owner == this.player){
+                            if(this.player.room.owner.idPlayer == this.player.idPlayer){
+                                this.player.room.startedGame = true;
+                                Game game = GameController.initNewGame(this.player.room);
+                                response.setData(game);
                                 MessageService.gI().sendMessageInRoom(this.player.room, response);
-                                this.player.room.isStartingGame = true;
-                                new Task(this.player, 10000) {
-                                    @Override
-                                    public void main() {
-                                        if(this.player.room.isStartingGame){
-                                            MessageService.gI().sendMessageInRoom(this.player.room,
-                                                    new Message(Constaint.MESSAGE_GAME_STARTING, null));
-                                            GameController.gI().startGame(this.player.room);
-                                        }
-                                    }
-                                }.start();
                             }
                             break;
                         }
@@ -152,28 +145,17 @@ public class SocketService implements TemplateService{
                             MessageService.gI().chat(this.player, (String)message.getData());
                             break;
                         }
-                        case Constaint.MESSAGE_STOP_GAME:{
-                            if(this.player.room.owner == this.player){
-                                MessageService.gI().sendMessageInRoom(this.player.room, response);
-                                this.player.room.isStartingGame = false;
-                            }
-                            break;
-                        }
-                        //Message ingame from client
-                        case Constaint.MESSAGE_PLAYER_VOTES:
-                        case Constaint.MESSAGE_PLAYER_CANCEL_VOTES:
-                        case Constaint.MESSAGE_XATHU_SHOOT:
-                        case Constaint.MESSAGE_WOLF_VOTES:
-                        case Constaint.MESSAGE_TIENTRI_SEE:
-                        case Constaint.MESSAGE_THAYBOI_SEE:
-                        case Constaint.MESSAGE_BACSI_ACT:
-                        case Constaint.MESSAGE_CHAT_FROM_HELL:
-                        case Constaint.MESSAGE_CHAT_FROM_WOLF:
-                        case Constaint.MESSAGE_SOITIENTRI_SEE:{
-                            GameController.gI().processMessage(this.player, message);
+                        //Các message khác cứ quăng cho GameController xử lý
+                        default:{
+                            GameController.gI(player).processMessage(this.player, message);
                         }
                     }
                 } catch (ClassNotFoundException | IOException e) {
+                    if(player.room != null){
+                        Room room = RoomService.gI().getRoomById(player.room.idRoom);
+                        RoomService.gI().leavedPlayer(player, room);
+                        RoomService.gI().reloadPlayer(room);
+                    }
                     try {
                         reader.close();
                         writer.close();

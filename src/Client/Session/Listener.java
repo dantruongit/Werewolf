@@ -1,7 +1,7 @@
 package Client.Session;
 
 import Client.GameRoom;
-import Client.Room_List;
+import Client.HomePanel;
 import Client.utils.gui;
 import Model.*;
 import config.Constaint;
@@ -68,12 +68,62 @@ public class Listener extends Thread{
                         }
                         break;
                     }
+                    case Constaint.MESSAGE_ROOM_REMOVED:{
+                        gui.showMessage("Chủ phòng đã rời. Room sẽ bị đóng !");
+                        service.panelGame = null;
+                        service.frm.changePanel(new HomePanel());
+                        break;
+                    }
+                    case Constaint.MESSAGE_START_GAME:{
+                        Game game = (Game)data;
+                        service.dataSource.player.game = game;
+                        service.panelGame.gameStarted(true);
+                        break;
+                    }
+                    //Nhận role trong game
+                    case Constaint.MESSAGE_PICK_ROLE:{
+                        Integer i = (Integer)data;
+                        byte idRole = i.byteValue();
+                        service.dataSource.player.playerEffect = new PlayerEffect();
+                        service.dataSource.player.playerEffect.idRole = idRole;
+                        System.out.println("Role nhận được : " + idRole);
+                        service.panelGame.setRoleMySelf(idRole);
+                        break;
+                    }
+                    case Constaint.STAGE_CHANGE:{
+                        byte currentStage = (byte)data;
+                        Stage stage;
+                        switch(currentStage){
+                            case Constaint.STAGE_SLEEPING:{
+                                String messageStatus = Utils.Message.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
+                                stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_SLEEPING);
+                                service.panelGame.turnNight();
+                                service.panelGame.updateStage(stage);
+                                break;
+                            }
+                            case Constaint.STAGE_DISCUSSING:{
+                                String messageStatus = Utils.Message.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
+                                stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_DISCUSSING);
+                                service.panelGame.turnDay();
+                                service.panelGame.updateStage(stage);
+                                break;
+                            }
+                            case Constaint.STAGE_VOTING:{
+                                String messageStatus = Utils.Message.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
+                                stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_VOTING);
+                                service.panelGame.updateStage(stage);
+                                break;
+                            }
+                        }
+                        break;
+                    }
                     default:{
                         System.out.println("[NotProcess] " + message.getMessageCode());
                         break;
                     }
                 }
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

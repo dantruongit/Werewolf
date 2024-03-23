@@ -3,18 +3,18 @@ package Model;
 import java.io.Serializable;
 
 public class PlayerEffect implements Serializable{
-    public byte idRole; 
+    transient public byte idRole; 
     //Role
-    public boolean isDanLang = false;
-    public boolean isThayBoi = false;
-    public boolean isBacSi = false;
-    public boolean isBanSoi = false;
-    public boolean isXaThu = false;
-    public boolean isThayDong = false; 
-    public boolean isTienTri = false;
-    public boolean isSoi = false;
-    public boolean isSoiTienTri = false;
-    public boolean isChuaHe = false;
+    transient public boolean isDanLang = false;
+    transient public boolean isThayBoi = false;
+    transient public boolean isBacSi = false;
+    transient public boolean isBanSoi = false;
+    transient public boolean isXaThu = false;
+    transient public boolean isThayDong = false; 
+    transient public boolean isTienTri = false;
+    transient public boolean isSoi = false;
+    transient public boolean isSoiTienTri = false;
+    transient public boolean isChuaHe = false;
     
     public boolean isWolf(){
         return isSoi;
@@ -33,4 +33,5 @@ public class PlayerEffect implements Serializable{
     public boolean duocBaoVe = false;
     public boolean isDie = false;
     public int bullet = 0;
+    public boolean hasRevival = false;
 }

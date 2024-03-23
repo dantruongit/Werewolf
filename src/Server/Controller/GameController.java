@@ -4,6 +4,7 @@ import Model.Game;
 import Model.Player;
 import Model.PlayerEffect;
 import Model.Room;
+import Model.TaskInterval;
 import Model.Vote;
 import Server.service.MessageService;
 import Server.service.RoleService;
@@ -14,19 +15,16 @@ import java.util.List;
 import payload.Message;
 
 public class GameController {
-    private static final GameController gameController = new GameController();
     
-    public static GameController gI(){
-        return gameController;
-    }
+    private GameController(Game game){ this.game = game; }
+    private final Game game;
+    private final static List<GameController> games = new ArrayList<>();
+    private byte gameState = Constaint.STAGE_SLEEPING;
+    private TaskInterval task;
     
-    public List<Game> gamesRunning = new ArrayList<>();
-    public List<Vote> voteTickets = new ArrayList<>();
-    
-    
-    public void addNewGame(Room room){
+    public static Game initNewGame(Room room){
         Game game = new Game();
-        game.currentTime = Constaint.TIME_DAY;
+        game.idGame = Game.id++;
         game.room = room;
         room.players.forEach(p -> {
             p.game = game;
@@ -35,14 +33,133 @@ public class GameController {
             }
         });
         game.players = room.players;
-        gamesRunning.add(game);
+        GameController gameC = new GameController(game);
+        gameC.startGame();
+        games.add(gameC);
+        return game;
     }
     
-    public void startGame(Room room){
-        MessageService.gI().sendMessageInRoom(room, new Message(Constaint.MESSAGE_GAME_STARTED, true));
-        RoleService.gI().rollRoles(room);
-        room.startedGame = true;
-        this.addNewGame(room);
+    public static GameController gI(Player player){
+        for(GameController gameController: games){
+            if(gameController.game.idGame == player.game.idGame){
+                return gameController;
+            }
+        }
+        return null;
+    }
+    
+    public List<Vote> voteTickets = new ArrayList<>();
+    
+    public void startGame(){
+        //Quay số role
+        RoleService.gI().rollRoles(this.game.room, this.game);
+        //Start game
+        new Thread(() ->{
+            try {
+                Thread.sleep(3000);
+            } catch (Exception e) {
+            }
+            this.start();
+        }).start();
+    }
+    
+    //Hàm xử lý ban đêm: gọi các vai trò đặc biệt dậy
+    private void wakeUpSpecial(){
+        for(Player p: game.players){
+            Message message = new Message();
+            //Chưa ngỏm thì gọi dậy thực hiện vai trò
+            if(!p.playerEffect.isDie){
+                switch(p.playerEffect.idRole){
+                    case Constaint.ROLE_THAYBOI:{
+                        message.setMessageCode(Constaint.WakeUp.ROLE_THAYBOI);
+                        break;
+                    }
+                    case Constaint.ROLE_BACSI:{
+                        message.setMessageCode(Constaint.WakeUp.ROLE_BACSI);
+                        break;
+                    }
+                    case Constaint.ROLE_THAYDONG:{
+                        message.setMessageCode(Constaint.WakeUp.ROLE_THAYDONG);
+                        break;
+                    }
+                    case Constaint.ROLE_TIENTRI:{
+                        message.setMessageCode(Constaint.WakeUp.ROLE_TIENTRI);
+                        break;
+                    }
+                    case Constaint.ROLE_SOITIENTRI:{
+                        message.setMessageCode(Constaint.WakeUp.ROLE_SOITIENTRI);
+                        break;
+                    }
+                    case Constaint.ROLE_SOI:{
+                        message.setMessageCode(Constaint.WakeUp.ROLE_SOI);
+                        break;
+                    }
+                }
+            }
+            //Ngỏm rồi thì thêm vào hell
+            else{
+                message.setMessageCode(Constaint.CAN_CHAT_IN_HELL);
+            }
+            MessageService.gI().sendMessagePrivate(p, message);
+        }
+    }
+    
+    
+    
+    private void calculateStage(){
+        try {
+            Thread.sleep(5000);
+        } catch (Exception e) {
+        }
+    }
+    
+    private void changeState(){
+        this.gameState = 
+        this.gameState == Constaint.STAGE_VOTING ? Constaint.STAGE_SLEEPING :
+        this.gameState == Constaint.STAGE_SLEEPING ? Constaint.STAGE_DISCUSSING :
+        Constaint.STAGE_VOTING;
+    }
+    
+    private void start(){
+        task = new TaskInterval() {
+            @Override
+            public void main() {
+                int delay = 10000;
+                byte currentState = gameState;
+                MessageService.gI().sendMessageInRoom(game.room, 
+                        new Message(Constaint.STAGE_CHANGE, currentState));
+                //Bắt đầu xử lý các stage hiện tại 
+                switch(currentState){
+                    //Thảo luận ban ngày
+                    case Constaint.STAGE_DISCUSSING:{
+                        delay = Constaint.Time.TIME_DISCUSSING;
+                        break;
+                    }
+                    //Voting ban ngày
+                    case Constaint.STAGE_VOTING:{
+                        delay = Constaint.Time.TIME_VOTING;
+                        break;
+                    }
+                    //Gọi các vai trò dậy ở ban đêm ở đây, voting sói các kiểu
+                    case Constaint.STAGE_SLEEPING:{
+                        delay = Constaint.Time.TIME_SLEEPING;
+                        //Gọi các vai trò đặc biệt dậy
+                        wakeUpSpecial();
+                        break;
+                    }
+                }
+                //Kết thúc stage
+                try {
+                    Thread.sleep(delay + 2000);
+                } catch (Exception e) {
+                }
+                //Tính toán kết quả stage và thông báo cho players
+                //calculateStage();
+                //Thay đổi stage
+                changeState();
+            }
+        };
+        task.start();
     }
     
     //Update game

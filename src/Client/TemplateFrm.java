@@ -5,8 +5,11 @@ import Client.utils.gui;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -25,12 +28,22 @@ public class TemplateFrm extends javax.swing.JFrame {
             e.printStackTrace();
         }
         initComponents();
-        //String namePlayer = JOptionPane.showInputDialog("Nhập tên của bạn: ");
+        this.setResizable(false);
+        //String namePlayer = JOptionPane.showInputDialog("Nhập username của bạn (<13 kí tự): ");
+        String namePlayer = "123456789";
+        String regex = "^[a-z0-9]{1,12}$";
+        Pattern pattern = Pattern.compile(regex);
         
-        String namePlayer = "Đan Trường";
         if(namePlayer == null || namePlayer.equals("")){
             System.exit(0);
         }
+        while(!pattern.matcher(namePlayer).matches()){
+            namePlayer = JOptionPane.showInputDialog("Nhập username của bạn (<13 kí tự): ");
+            if(namePlayer == null || namePlayer.equals("")){
+                System.exit(0);
+            }       
+        }
+        
         Service.gI().joinGame(namePlayer);
         Service.gI().init();
 

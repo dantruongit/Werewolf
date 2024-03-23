@@ -13,7 +13,6 @@ public class MessageService {
     }
     
     public void sendMessageInRoom(Room r, Message message){
-        System.out.println("[CHAT]" + r.players);
         for(Player p: r.players){
             if(p!= null && p.writer != null){
                 sendMessagePrivate(p, message);

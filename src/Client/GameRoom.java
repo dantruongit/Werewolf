@@ -10,13 +10,17 @@ import config.Constaint;
 import javax.swing.JLabel;
 import Model.*;
 import java.awt.Color;
-import java.util.List;
 
+/**
+ *
+ * @author cr4zyb0t
+ */
 public class GameRoom extends javax.swing.JPanel {
-    
+    private final int idRoomOwner; 
     private class PlayerUI{
         public int index;
-        private JLabel avatar, voteIcon, count, iconRole, name;
+        public JLabel avatar, voteIcon, count, iconRole, name;
+        public Player p;
 
         public void setAvatar(JLabel avatar) {
             this.avatar = avatar;
@@ -39,28 +43,25 @@ public class GameRoom extends javax.swing.JPanel {
         }
         
         public void loadPlayer(Player p){
+            this.p = p;
             int avatarId  = Utils.Utils.nextInt(1, 4);
             avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar" + avatarId+ ".jpg", 75, 75));
             
             name.setText(index + " " + p.namePlayer);
+            if(p.idPlayer == Service.gI().dataSource.player.idPlayer){
+                name.setForeground(Color.red);
+            }
+            if(idRoomOwner == p.idPlayer){
+                String path = Constaint.pathRoot + "/assets/crown.png";
+                System.out.println(path);
+                this.iconRole.setIcon(gui.resizeImage
+                    (path, 24, 24));
+                this.iconRole.setVisible(true);
+            }
         }
         
     }
-    private class State{
-        public int idRole; 
-        public JLabel label;
-        public boolean isAlive = true;
-
-        public void setLabel(JLabel label) {
-            this.label = label;
-        }
-
-        public void setIsAlive(boolean isAlive) {
-            this.isAlive = isAlive;
-        }
-        
-    }
-    private final State[] states = new State[10];
+    
     private final PlayerUI[] playersUI = new PlayerUI[9];
     
     private void initGUI(){
@@ -88,7 +89,7 @@ public class GameRoom extends javax.swing.JPanel {
         turnDay();
     }
     
-    public void resetUI(PlayerUI ui){
+    private void resetUI(PlayerUI ui){
         ui.avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar_unknown.jpg", 75, 75));
         ui.name.setText("");
         ui.count.setVisible(false);
@@ -96,6 +97,9 @@ public class GameRoom extends javax.swing.JPanel {
         ui.voteIcon.setVisible(false);
     }
     
+    /**
+     * Hàm reload players khi có thay đổi
+     */
     public void reloadPlayers(){
         int index = 0;
         var players = Service.gI().dataSource.player.room.players;
@@ -105,20 +109,31 @@ public class GameRoom extends javax.swing.JPanel {
         for(int j = index; j < 9; j++){
             resetUI(playersUI[j]);
         }
-        addMessage("Load được " + Service.gI().dataSource.player.room.players.size());
+        //addMessage("Load được " + Service.gI().dataSource.player.room.players.size());
     }
     
-    private void turnNight(){
-        System.out.println("NIGHT");
-        Color day = new Color(153, 153, 153);
-        txtInput.setBackground(day);
-        txtChat.setBackground(day);
-        txtChat.setForeground(Color.WHITE);
-        btnSend.setBackground(day);
+    /**
+     * Hàm thêm message vào GUI của Client
+     * @param message Chuỗi cần thêm vào
+     */
+    public void addMessage(String message){
+        String old = txtChat.getText();
+        txtChat.setText(old + "\n" + message);
     }
     
-    private void turnDay(){
-        System.out.println("DAY");
+    /**
+     * Hàm update thanh status khi stage thay đổi
+     * @param stage đối tượng Stage bao gồm time countdown, message và 
+     */
+    public void updateStage(Stage stage){
+        gui.changePanel(mainPanel, new PanelTime(stage));
+    }
+    
+    //Xử lý trong quá trình chơi
+    /**
+     * Bật chế độ ban ngày cho UI
+     */
+    public void turnDay(){
         Color day = new Color(242, 242, 242);
         txtInput.setBackground(day);
         txtChat.setBackground(day);
@@ -126,20 +141,71 @@ public class GameRoom extends javax.swing.JPanel {
         btnSend.setBackground(day);
     }
     
-    public void addMessage(String message){
-        String old = txtChat.getText();
-        txtChat.setText(old + "\n" + message);
+    /**
+     * Bật chế độ ban đêm cho UI
+     */
+    public void turnNight(){
+        Color day = new Color(153, 153, 153);
+        txtInput.setBackground(day);
+        txtChat.setBackground(day);
+        txtChat.setForeground(Color.WHITE);
+        btnSend.setBackground(day);
     }
     
-    public void updateStage(Stage stage){
-        gui.changePanel(mainPanel, new PanelTime(stage));
+    /**
+     * Xử lý nhẹ khi game bắt đầu
+     * @param flag status game đã bắt đầu hay chưa
+     */
+    public void gameStarted(boolean flag){
+        btnStart.setVisible(!flag);
+        String x = flag ? "bắt đầu" : "kết thúc";
+        addMessage("[Server]: Trò chơi đã " + x + " !");
+    }
+    /**
+     * Hàm set role và chạy hiệu ứng random role
+     * @param idRole id role nhận được từ server
+     */
+    public void setRoleMySelf(byte idRole){
+        new Thread(()->{
+            PlayerUI uj = null;
+            for(PlayerUI u: playersUI){
+                if(u.p != null && u.p.idPlayer == Service.gI().dataSource.player.idPlayer){
+                    uj = u;
+                }
+            }
+            try {
+                for(int i = 0 ; i < 30;i++){
+                    Thread.sleep(50);
+                    byte rd = (byte)Utils.Utils.nextInt(0, 9);
+                    if(uj != null){
+                        String path = Constaint.pathRoot + "/assets/icon_role" + rd + ".png";
+                        uj.iconRole.setIcon(gui.resizeImage(path, 36, 36));
+                        uj.iconRole.setVisible(true);
+                    }
+                }
+            } catch (Exception e) {
+            }
+            if(uj != null){
+                String path = Constaint.pathRoot + "/assets/icon_role" + idRole + ".png";
+                uj.iconRole.setIcon(gui.resizeImage(path, 36, 36));
+            }
+            addMessage("Bạn đã nhận được vai trò " + Constaint.getRoleNameById(idRole));
+        }).start();
     }
     
+    /**
+     *
+     */
     public GameRoom() {
         initComponents();
         initGUI();
         Service.gI().panelGame  = this;
-        Room room = Service.gI().dataSource.player.room;
+        Player player = Service.gI().dataSource.player;
+        Room room = player.room;
+        this.idRoomOwner = room.owner.idPlayer;
+        if(room.owner.idPlayer != player.idPlayer){
+            btnStart.setVisible(false);
+        }
         gui.changePanel(mainPanel, new PanelStatus(room.configs, room.isRandom));
         reloadPlayers();
     }
@@ -560,6 +626,11 @@ public class GameRoom extends javax.swing.JPanel {
         jLabel69.setBounds(385, 30, 0, 0);
 
         btnStart.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/start.png"))); // NOI18N
+        btnStart.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnStartActionPerformed(evt);
+            }
+        });
         jPanel2.add(btnStart);
         btnStart.setBounds(790, 20, 60, 40);
 
@@ -576,6 +647,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name0);
         name0.setBounds(40, 170, 100, 16);
 
+        roleUser0.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser0);
         roleUser0.setBounds(70, 40, 40, 30);
@@ -599,6 +671,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name1);
         name1.setBounds(150, 170, 100, 16);
 
+        roleUser1.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser1);
         roleUser1.setBounds(190, 40, 40, 30);
@@ -622,6 +695,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name2);
         name2.setBounds(270, 170, 100, 16);
 
+        roleUser2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser2);
         roleUser2.setBounds(310, 40, 40, 30);
@@ -645,6 +719,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name3);
         name3.setBounds(40, 330, 100, 16);
 
+        roleUser3.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser3);
         roleUser3.setBounds(70, 200, 40, 30);
@@ -668,6 +743,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name4);
         name4.setBounds(160, 330, 100, 16);
 
+        roleUser4.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser4);
         roleUser4.setBounds(190, 200, 40, 30);
@@ -691,6 +767,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name5);
         name5.setBounds(280, 330, 100, 16);
 
+        roleUser5.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser5);
         roleUser5.setBounds(310, 200, 40, 30);
@@ -714,6 +791,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name6);
         name6.setBounds(40, 480, 100, 16);
 
+        roleUser6.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser6);
         roleUser6.setBounds(70, 350, 40, 30);
@@ -737,6 +815,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name7);
         name7.setBounds(160, 480, 100, 16);
 
+        roleUser7.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser7);
         roleUser7.setBounds(190, 350, 40, 30);
@@ -760,6 +839,7 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(name8);
         name8.setBounds(280, 480, 100, 16);
 
+        roleUser8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         roleUser8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
         jPanel2.add(roleUser8);
         roleUser8.setBounds(310, 350, 40, 30);
@@ -838,12 +918,17 @@ public class GameRoom extends javax.swing.JPanel {
     
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
         Service.gI().sendMessage(Constaint.MESSAGE_LEAVE_ROOM, null);
+        Service.gI().panelGame = null;
         Service.gI().frm.changePanel(new HomePanel());
     }//GEN-LAST:event_btnExitActionPerformed
 
     private void txtInputActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtInputActionPerformed
         sendMessage();
     }//GEN-LAST:event_txtInputActionPerformed
+
+    private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
+        Service.gI().sendMessage(Constaint.MESSAGE_START_GAME, null);
+    }//GEN-LAST:event_btnStartActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -4,6 +4,7 @@ import Client.GameRoom;
 import Client.TemplateFrm;
 import Client.utils.gui;
 import Model.Player;
+import Model.PlayerEffect;
 import Model.Room;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

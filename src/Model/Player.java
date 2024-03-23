@@ -8,7 +8,7 @@ public class Player implements Serializable{
     
     public int idPlayer;
     public String namePlayer;
-    public PlayerEffect playerEffect = new PlayerEffect();
+    transient public PlayerEffect playerEffect = new PlayerEffect();
     public Room room;
     public Game game;
     transient public ObjectOutputStream writer;

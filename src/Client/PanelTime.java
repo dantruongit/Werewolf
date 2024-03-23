@@ -1,21 +1,56 @@
 package Client;
 
+import Client.utils.gui;
+import Model.Role;
 import Model.Stage;
+import config.Constaint;
+import java.util.List;
+import javax.swing.JLabel;
 
 /**
  *
  * @author cr4zyb0t
  */
 public class PanelTime extends javax.swing.JPanel {
-
-    /**
-     * Creates new form PanelStatus
-     */
-    public PanelTime(Stage stage) {
-        initComponents();
+    private Stage stage;
+    private class CountDown implements Runnable{
+        private int delay;
+        public CountDown(int delay){
+            this.delay = delay;
+        }
+        @Override
+        public void run() {
+            while(delay >= 0){
+                labelThongBao.setText(stage.message + " " + delay/1000 + "s");
+                delay -= 1000;
+                try {
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                }
+            }
+        }
+        
     }
     
-    
+    public PanelTime(Stage stage) {
+        initComponents();
+        this.stage = stage;
+        String url = Constaint.pathRoot + "/assets/";
+        switch(stage.time){
+            case Constaint.STAGE_SLEEPING:{
+                url+="status_moon.png";
+                
+                break;
+            }
+            case Constaint.STAGE_DISCUSSING:
+            case Constaint.STAGE_VOTING:{
+                url += "status_sun.png";
+                break;
+            }
+        }
+        icon.setIcon(gui.resizeImage(url, 90, 90));
+        new Thread(new CountDown(stage.miliseconds)).start();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -26,178 +61,39 @@ public class PanelTime extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        role0 = new javax.swing.JLabel();
-        count0 = new javax.swing.JLabel();
-        role1 = new javax.swing.JLabel();
-        count1 = new javax.swing.JLabel();
-        role2 = new javax.swing.JLabel();
-        count2 = new javax.swing.JLabel();
-        role3 = new javax.swing.JLabel();
-        count3 = new javax.swing.JLabel();
-        role4 = new javax.swing.JLabel();
-        count4 = new javax.swing.JLabel();
-        count5 = new javax.swing.JLabel();
-        role5 = new javax.swing.JLabel();
-        count6 = new javax.swing.JLabel();
-        role6 = new javax.swing.JLabel();
-        count7 = new javax.swing.JLabel();
-        count8 = new javax.swing.JLabel();
-        role7 = new javax.swing.JLabel();
-        role8 = new javax.swing.JLabel();
-        count9 = new javax.swing.JLabel();
-        role9 = new javax.swing.JLabel();
+        labelThongBao = new javax.swing.JLabel();
+        icon = new javax.swing.JLabel();
 
-        role0.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        labelThongBao.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
+        labelThongBao.setText("Thời gian thảo luận 34s");
 
-        count0.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count0.setText("1");
-
-        role1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        count1.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count1.setText("1");
-
-        role2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        count2.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count2.setText("1");
-
-        role3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        count3.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count3.setText("1");
-
-        role4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        count4.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count4.setText("1");
-
-        count5.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count5.setText("1");
-
-        role5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        count6.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count6.setText("1");
-
-        role6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        count7.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count7.setText("1");
-
-        count8.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count8.setText("1");
-
-        role7.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        role8.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
-
-        count9.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
-        count9.setText("1");
-
-        role9.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_role0.png"))); // NOI18N
+        icon.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        icon.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/status_moon.png"))); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(role7, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count8, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role8, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count9, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role9, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count5, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role5, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count6, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role6, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count7, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(role0, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count0, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role1, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count1, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role2, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count2, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role3, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count3, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(role4, javax.swing.GroupLayout.PREFERRED_SIZE, 40, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(count4, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(17, 17, 17)
+                .addComponent(labelThongBao)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 35, Short.MAX_VALUE)
+                .addComponent(icon, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(role4, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count4, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count3, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count2, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count1, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role0, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count0, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(role6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count7, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role5, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count6, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role9, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count5, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role8, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count9, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(role7, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(count8, javax.swing.GroupLayout.PREFERRED_SIZE, 30, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(33, 33, 33)
+                .addComponent(labelThongBao)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(icon, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel count0;
-    private javax.swing.JLabel count1;
-    private javax.swing.JLabel count2;
-    private javax.swing.JLabel count3;
-    private javax.swing.JLabel count4;
-    private javax.swing.JLabel count5;
-    private javax.swing.JLabel count6;
-    private javax.swing.JLabel count7;
-    private javax.swing.JLabel count8;
-    private javax.swing.JLabel count9;
-    private javax.swing.JLabel role0;
-    private javax.swing.JLabel role1;
-    private javax.swing.JLabel role2;
-    private javax.swing.JLabel role3;
-    private javax.swing.JLabel role4;
-    private javax.swing.JLabel role5;
-    private javax.swing.JLabel role6;
-    private javax.swing.JLabel role7;
-    private javax.swing.JLabel role8;
-    private javax.swing.JLabel role9;
+    private javax.swing.JLabel icon;
+    private javax.swing.JLabel labelThongBao;
     // End of variables declaration//GEN-END:variables
 }
