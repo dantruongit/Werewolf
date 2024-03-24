@@ -20,6 +20,10 @@ public class PlayerEffect implements Serializable{
         return isSoi;
     }
     
+    public boolean isWolfTeam(){
+        return isSoi || isSoiTienTri;
+    }
+    
     public boolean isUnknown(){
         return isSoiTienTri || isXaThu || isThayDong || isChuaHe;
     }
@@ -31,10 +35,6 @@ public class PlayerEffect implements Serializable{
     //effect
     public boolean isShowRole = false;
     public boolean duocBaoVe = false;
-    public boolean isDie = false;
     public int bullet = 0;
-    //Đã sử dụng lượt hồi sinh của thầy đồng chưa
-    public boolean hasRevival = false;
-    //Đã sử dụng tiên tri chưa (cho cả sói tiên tri/tiên tri/thầy bói luôn)
-    public boolean hasSeenOtherRole = false;
+    public int revivalTime = 0;
 }

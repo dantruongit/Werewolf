@@ -17,7 +17,7 @@ public class MessageService {
     
     public void sendMessageInRoom(Room r, Message message){
         for(Player p: r.players){
-            if(p!= null && p.writer != null){
+            if(p != null && p.writer != null){
                 sendMessagePrivate(p, message);
             }
         }
@@ -37,26 +37,28 @@ public class MessageService {
         this.sendMessageInRoom(playerSend.room, message);
     }
     
-    public void sendMessageForTeam(List<Player> players,Message message ,byte team){
+    public void sendMessageForTeam(List<Player> players,Message message ,byte team, boolean includeDiePlayer){
         for(var p: players){
             PlayerEffect pE = p.playerEffect;
-            if(p.writer != null && !p.playerEffect.isDie){
+            if(p.writer != null){
                 boolean canSend = 
                         team == Constaint.TEAM_WOLF && pE.isWolf() ||
                         team == Constaint.TEAM_VILLAGE && pE.isVillage() ||
                         team == Constaint.TEAM_THIRD && pE.isUnknown();
-                if(canSend)
+                boolean canSendToDiePlayer = includeDiePlayer ? true : !p.isDie;
+                if(canSend && canSendToDiePlayer)
                     sendMessagePrivate(p, message);
             }
         }
     }
     
     public void sendMessagePrivate(Player player, Message message){
+        if(!player.isBot)
         try {
             player.writer.writeObject(message);
             player.writer.reset();
             player.writer.flush();
-            System.out.println("[sendMessagePrivate] " + message.getMessageCode());
+            //System.out.println("[sendMessagePrivate] " + message.getMessageCode());
         } catch (IOException e) {
             e.printStackTrace();
         }

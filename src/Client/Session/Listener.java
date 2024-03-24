@@ -4,6 +4,7 @@ import Client.GameRoom;
 import Client.HomePanel;
 import Client.utils.gui;
 import Model.*;
+import Utils.StringUtils;
 import config.Constaint;
 import java.io.ObjectInputStream;
 import java.util.List;
@@ -43,10 +44,10 @@ public class Listener extends Thread{
                         break;
                     }
                     case Constaint.MESSAGE_JOIN_SERVER:{
-                        if(data == null){
-                            gui.showMessage("Tên bạn chọn đã có người đặt !");
-                            break;
-                        }
+//                        if(data == null){
+//                            gui.showMessage("Tên bạn chọn đã có người đặt !");
+//                            break;
+//                        }
                         service.dataSource.player = (Player)data;
                         service.frm.changePanel(new HomePanel());
                         break;
@@ -130,17 +131,67 @@ public class Listener extends Thread{
                     case Constaint.WakeUp.ROLE_SOITIENTRI:
                     case Constaint.WakeUp.ROLE_THAYBOI:
                     case Constaint.WakeUp.ROLE_THAYDONG:
-                    case Constaint.WakeUp.ROLE_TIENTRI:{
+                    case Constaint.WakeUp.ROLE_TIENTRI:
+                    case Constaint.WakeUp.ROLE_XATHU:{
                         byte idRole = service.dataSource.player.playerEffect.idRole ;
-                        String messageAlert = String.format("[Server]: Bạn là %s. Bạn có thể %s",
+                        if(!service.panelGame.hasShowTutorial){
+                            String messageAlert = String.format("[Server]: Bạn là %s.\nBạn có thể %s",
                                 Utils.StringUtils.getRoleNameById(idRole),Utils.StringUtils.getDescFuncRole(idRole));
-                        service.panelGame.addMessage(messageAlert);
+                            service.panelGame.addMessage(messageAlert);
+                            service.panelGame.hasShowTutorial = true;
+                        }
+                        service.panelGame.turnOnBtnFunction(true);
                         break;
                     }
-                    //Reload lại danh sách sói votes
-                    case Constaint.MESSAGE_WOLF_VOTES:{
+                    //Reload lại danh sách votes
+                    case Constaint.MESSAGE_UPDATE_VOTING:{
                         List<Player> playerStates = (List<Player>)data;
-                        service.panelGame.reloadWolfVotes(playerStates);
+                        service.panelGame.reloadVotes(playerStates);
+                        break;
+                    }
+                    //Hiển thị role của người chơi
+                    case Constaint.MESSAGE_PLAYER_DIE:{
+                        Player pTarget = (Player)data;
+                        byte role = (byte)message.getTmp();
+                        service.panelGame.setDiePlayer(pTarget, role);
+                        break;
+                    }
+                    //Nhận danh sách sói
+                    case Constaint.MESSAGE_LIST_OTHER_WOLFS:{
+                        List<Player> wolfs = (List<Player>)data;
+                        service.panelGame.loadWolfs(wolfs);
+                        break;
+                    }
+                    case Constaint.MESSAGE_THAYBOI_SEE:{
+                        byte teamTarget = (byte)data;
+                        service.panelGame.addMessage("Người chơi đó thuộc phe " + StringUtils.getTeamById(teamTarget) + ".");
+                        break;
+                    }
+                    case Constaint.MESSAGE_TIENTRI_SEE:{
+                        byte roleTarget = (byte)data;
+                        service.panelGame.addMessage("Vai trò của người chơi đó là [" + StringUtils.getRoleNameById(roleTarget) +"].");
+                        break; 
+                    }
+                    case Constaint.MESSAGE_SOITIENTRI_SEE:{
+                        Player pTarget = (Player)data;
+                        String content = String.format("Sói tiên tri đã soi người chơi %s là [%s].",pTarget.namePlayer,  StringUtils.getRoleNameById((byte)message.getTmp()));
+                        service.panelGame.addMessage(content);
+                        break; 
+                    }
+                    case Constaint.MESSAGE_BACSI_BAOVE:{
+                        String userProtect = (String)data;
+                        service.panelGame.setProtect(userProtect);
+                        break;
+                    }
+                    //Xạ thủ lộ role 
+                    case Constaint.MESSAGE_XATHU_SHOOT:{
+                        String username = (String)data;
+                        service.panelGame.showShooter(username);
+                        break;
+                    }
+                    //Hết đạn 
+                    case Constaint.MESSAGE_XATHU_OUT_OF_BULLET:{
+                        service.panelGame.disableSpecial = true;
                         break;
                     }
                     default:{

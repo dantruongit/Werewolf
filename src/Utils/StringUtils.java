@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class StringUtils {
     public static boolean isValidUsername(String username){
-        String regex = "^[a-z0-9]{1,12}$";
+        String regex = "^[a-z0-9]{1,50}$";
         Pattern pattern = Pattern.compile(regex);
         
         if(username == null || username.equals("")){
@@ -24,6 +24,22 @@ public class StringUtils {
         return pattern.matcher(username).matches();
     }
     
+    public static String getTeamById(byte id){
+        switch(id){
+            case Constaint.TEAM_WOLF:{
+                return "[Phe ác]";
+            }
+            case Constaint.TEAM_VILLAGE:{
+                return "[Phe thiện]";
+            }
+            case Constaint.TEAM_THIRD:{
+                return "[Phe không rõ]";
+            }
+            default:{
+                return "";
+            }
+        }
+    }
     public static String getRoleNameById(byte id){
         String res;
         switch(id){
@@ -37,7 +53,7 @@ public class StringUtils {
                 res = "Bác sĩ";
                 break;
             case ROLE_BANSOI:
-                res = "Bản sơi";
+                res = "Bán sói";
                 break;
             case ROLE_THANGNGO:
                 res = "Thằng ngố";
@@ -114,5 +130,9 @@ public class StringUtils {
             }
         }
         return "";
+    }
+    
+    public static boolean isWolf(byte role){
+        return role == Constaint.ROLE_SOI || role == Constaint.ROLE_SOITIENTRI;
     }
 }

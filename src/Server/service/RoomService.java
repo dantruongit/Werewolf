@@ -59,7 +59,7 @@ public class RoomService implements TemplateService{
             }
             if(target.game != null){
                 target.game.players.removeIf(p -> p.namePlayer == target.namePlayer);
-                target.game.playersDie.removeIf(p -> p.namePlayer == target.namePlayer);
+                target.game.playersInHell.removeIf(p -> p.namePlayer == target.namePlayer);
             }
             MessageService.gI().sendMessageInRoom(room, 
                     new Message(Constaint.MESSAGE_CHAT, "[Server]: " + target.namePlayer + " đã rời khỏi phòng."));

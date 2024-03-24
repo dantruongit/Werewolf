@@ -10,8 +10,10 @@ public class Game implements Serializable{
     public int idGame ;
     public Room room;
     public byte gameState = Constaint.STAGE_SLEEPING;
+    public boolean isShowRoleWhenDie = false;
+    public boolean isShootSameDay = false;
     public List<Player> players = new ArrayList<>();
     transient public List<Player> teamWolf = new ArrayList<>();
-    public List<Player> playersDie = new ArrayList<>();
+    public List<Player> playersInHell = new ArrayList<>();
     
 }

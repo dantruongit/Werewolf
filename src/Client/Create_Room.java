@@ -228,6 +228,7 @@ public class Create_Room extends javax.swing.JPanel {
         btn101 = new javax.swing.JButton();
         btn102 = new javax.swing.JButton();
         checkboxRandom = new javax.swing.JCheckBox();
+        checkboxShowRole = new javax.swing.JCheckBox();
 
         setLayout(null);
 
@@ -470,7 +471,18 @@ public class Create_Room extends javax.swing.JPanel {
             }
         });
         add(checkboxRandom);
-        checkboxRandom.setBounds(420, 240, 120, 24);
+        checkboxRandom.setBounds(420, 280, 150, 24);
+
+        checkboxShowRole.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        checkboxShowRole.setText("Hiện vai trò khi chết");
+        checkboxShowRole.setFocusable(false);
+        checkboxShowRole.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                checkboxShowRoleActionPerformed(evt);
+            }
+        });
+        add(checkboxShowRole);
+        checkboxShowRole.setBounds(420, 240, 170, 24);
     }// </editor-fold>//GEN-END:initComponents
 
     private void btn11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btn11ActionPerformed
@@ -528,6 +540,7 @@ public class Create_Room extends javax.swing.JPanel {
         }
         room.configs = roleConfigs;
         room.isRandom = checkboxRandom.isSelected();
+        room.isShowRoleWhenDie = checkboxShowRole.isSelected();
         Service.gI().sendMessage(Constaint.MESSAGE_CREATE_ROOM, room);
     }//GEN-LAST:event_btnTaoPhongActionPerformed
 
@@ -535,7 +548,15 @@ public class Create_Room extends javax.swing.JPanel {
         for(var u : ui){
             u.setVisible(!checkboxRandom.isSelected());
         }
+        checkboxShowRole.setSelected(checkboxRandom.isSelected());
     }//GEN-LAST:event_checkboxRandomActionPerformed
+
+    private void checkboxShowRoleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxShowRoleActionPerformed
+        for(var u : ui){
+            u.setVisible(!checkboxRandom.isSelected());
+        }
+        checkboxRandom.setSelected(checkboxShowRole.isSelected());
+    }//GEN-LAST:event_checkboxShowRoleActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -572,6 +593,7 @@ public class Create_Room extends javax.swing.JPanel {
     private javax.swing.JButton btnTaoPhong;
     private javax.swing.JButton btnThoatPhong;
     private javax.swing.JCheckBox checkboxRandom;
+    private javax.swing.JCheckBox checkboxShowRole;
     private javax.swing.JLabel label1;
     private javax.swing.JLabel label10;
     private javax.swing.JLabel label2;

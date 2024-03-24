@@ -75,7 +75,14 @@ public class SocketService implements TemplateService{
                             Player p = (Player)message.getData();
                             Player old = PlayerService.gI().getPlayerByUsername(p.namePlayer);
                             if(old != null){
-                                response.setData(null);
+//                                response.setData(null);
+                                p.namePlayer = System.currentTimeMillis() + "";
+                                p.playerEffect = new PlayerEffect();
+                                PlayerService.gI().players.add(p);
+                                PlayerService.gI().addPlayer(p);
+                                this.player = p;
+                                this.player.writer = writer;
+                                response.setData(p);
                             }
                             else{
                                 p.playerEffect = new PlayerEffect();
@@ -124,7 +131,19 @@ public class SocketService implements TemplateService{
                             RoomService.gI().reloadPlayer(room);
                             break;
                         }
-                        
+                        case Constaint.ADD_BOT:{
+                            Room room = RoomService.gI().getRoomById(player.room.idRoom);
+                            if(room != null){
+                                int numBot = 9 - room.players.size();
+                                for(int i = 0; i < numBot; i++){
+                                    Player p = PlayerService.gI().bots.get(i);
+                                    room.players.add(p);
+                                    p.room = room;
+                                }
+                                RoomService.gI().reloadPlayer(room);
+                            }
+                            break;
+                        }
                         case Constaint.MESSAGE_LEAVE_ROOM:{
                             Room room = RoomService.gI().getRoomById(player.room.idRoom);
                             if(room != null){
@@ -136,7 +155,7 @@ public class SocketService implements TemplateService{
                         
                         //Note
                         case Constaint.MESSAGE_START_GAME:{
-                            if(this.player.room.owner.namePlayer == this.player.namePlayer){
+                            if(this.player.room.owner.namePlayer.equals(this.player.namePlayer)){
                                 this.player.room.startedGame = true;
                                 Game game = GameController.initNewGame(this.player.room);
                                 response.setData(game);
@@ -154,7 +173,8 @@ public class SocketService implements TemplateService{
                         }
                     }
                 } catch (ClassNotFoundException | IOException e) {
-                    if(player.room != null){
+                    e.printStackTrace();
+                    if(player != null && player.room != null){
                         Room room = RoomService.gI().getRoomById(player.room.idRoom);
                         RoomService.gI().leavedPlayer(player, room);
                         RoomService.gI().reloadPlayer(room);

@@ -1,6 +1,7 @@
 package Server.service;
 
 import javax.swing.table.DefaultTableModel;
+import Model.*;
 
 public class ManagerService {
     public DefaultTableModel model;
@@ -15,6 +16,12 @@ public class ManagerService {
         RoleService.gI().init();
         RoomService.gI().init();
         SocketService.gI().init();
+        
+        //Mock up player
+        for(int i = 1 ; i <= 8 ; i++){
+            AIPlayer p = PlayerService.gI().makeBot("" + i);
+            PlayerService.gI().bots.add(p);
+        }
     }
     
     public static void stop(){

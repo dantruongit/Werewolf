@@ -3,6 +3,9 @@ package config;
 public class Constaint {
     public static final String pathRoot = "C://Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src";
     
+    public static final byte ADD_BOT = -11;
+    
+    public static final byte ROLE_UNKNOWN = -1; //Role ẩn khi chết
     public static final byte ROLE_DANLANG    = 0; // Phe thiện
     public static final byte ROLE_THAYBOI = 1; // Phe thiện
     public static final byte ROLE_BACSI = 2; // Phe thiện
@@ -22,9 +25,9 @@ public class Constaint {
     
     //Time
     public static class Time{
-        public static int TIME_SLEEPING = 100000; // 25
-        public static int TIME_DISCUSSING = 11000; // 30
-        public static int TIME_VOTING = 12000; //20
+        public static int TIME_SLEEPING = 15000; // 25
+        public static int TIME_DISCUSSING = 8000; // 30
+        public static int TIME_VOTING = 5000; //20
     }
     //Message code
     // In dashboard
@@ -47,20 +50,18 @@ public class Constaint {
     public static final byte STAGE_CHANGE = 124;
     
     //In game
+    public static final byte MESSAGE_PLAYER_DIE = -91;
     //DAY
     public static final byte MESSAGE_PICK_ROLE = -118;
-    public static final byte MESSAGE_START_DISCUSSING = 1;
-    public static final byte MESSAGE_END_DISCUSSING = 1;
-    public static final byte MESSAGE_START_VOTING   = 1;
     public static final byte MESSAGE_UPDATE_VOTING = -106;
     public static final byte MESSAGE_PLAYER_VOTES = -115;
-    public static final byte MESSAGE_PLAYER_CANCEL_VOTES = -114;
-    public static final byte MESSAGE_END_VOTING = 1;
-    public static final byte MESSAGE_VOTING_RESULT = 1;
+    public static final byte MESSAGE_PLAYER_CANCEL_VOTES = -88;
     public static final byte MESSAGE_VOTING_JOKES_MAN = 1;
     public static final byte MESSAGE_XATHU_SHOOT = -113;
+    public static final byte MESSAGE_XATHU_OUT_OF_BULLET = -86;
     public static final byte MESSAGE_UPDATE_PLAYER = -93;
     //NIGHT
+    public static final byte MESSAGE_LIST_OTHER_WOLFS = -90;
     //Message wake-up
     //Gọi các character dậy
     public static class WakeUp{
@@ -70,16 +71,18 @@ public class Constaint {
         public static final byte ROLE_TIENTRI = -97;
         public static final byte ROLE_SOITIENTRI = -96;
         public static final byte ROLE_SOI = -95;
+        public static final byte ROLE_XATHU = -85;
     }
-    public final static byte CAN_CHAT_IN_HELL = -94;
     
     public static final byte MESSAGE_WOLF_VOTES = -112; //SÓI VOTE
-    public static final byte MESSAGE_VOTING_RESULT_WOLF = 1;
+    public static final byte MESSAGE_WOLF_CANCEL_VOTES = -89; // SÓI hủy vote
     public static final byte MESSAGE_BANSOI_ACTIVED = 1;
     
     public static final byte MESSAGE_TIENTRI_SEE = -111;
     public static final byte MESSAGE_THAYBOI_SEE = -110;
-    public static final byte MESSAGE_BACSI_ACT = -109;
+    public static final byte MESSAGE_BACSI_BAOVE = -109;
+    public static final byte MESSAGE_BACSI_HUY_BAOVE = -87;
+    public static final byte MESSAGE_THAYDONG_HOISINH = -92;
     public static final byte MESSAGE_CHAT_FROM_HELL = -108;
     public static final byte MESSAGE_CHAT_FROM_WOLF = -104;
     public static final byte MESSAGE_SOITIENTRI_SEE = -107;

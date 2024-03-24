@@ -5,6 +5,7 @@ import Model.Role;
 import Model.Player;
 import Model.Room;
 import Utils.RandomUtils;
+import Utils.StringUtils;
 import config.Constaint;
 import java.util.ArrayList;
 import java.util.List;
@@ -131,7 +132,7 @@ public class RoleService implements TemplateService{
             }
             case Constaint.ROLE_THAYDONG:{
                 p.playerEffect.isThayDong = true;
-                p.playerEffect.hasRevival = true;
+                p.playerEffect.revivalTime = 1;
                 break;
             }
             case Constaint.ROLE_BACSI:{
@@ -180,14 +181,58 @@ public class RoleService implements TemplateService{
      * @param game
      */
     public void sendRoleToPlayer(List<Integer> arr, Game game){
+        //Fake
+//        int role2 = Constaint.ROLE_SOI;
+//        int role = Constaint.ROLE_XATHU;
+//        for(var p : game.players){
+//            if(p.namePlayer.equals("admin")){
+//                arr.remove((Integer)role);
+//                RoleService.gI().setPropertyRole(p, role);
+//                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)role));
+//                MessageService.gI().sendMessagePrivate(p, 
+//                        new Message(Constaint.MESSAGE_PICK_ROLE,role));
+//            }
+//            else if(p.namePlayer.length() > 5){
+//                arr.remove((Integer)role2);
+//                RoleService.gI().setPropertyRole(p, role2);
+//                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)role2));
+//                MessageService.gI().sendMessagePrivate(p, 
+//                        new Message(Constaint.MESSAGE_PICK_ROLE,role2));
+//            }
+//            else{
+//                int idRole = RandomUtils.getRandom(arr);
+//                arr.remove((Integer)idRole);
+//                RoleService.gI().setPropertyRole(p, idRole);
+//                if(idRole == Constaint.ROLE_THAYDONG){
+//                    game.playersInHell.add(p);
+//                }
+//                MessageService.gI().sendMessagePrivate(p, 
+//                        new Message(Constaint.MESSAGE_PICK_ROLE,role));
+//                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
+//            }
+//        }
+        
+        //Real
         for(Player p: game.players){
             int idRole = RandomUtils.getRandom(arr);
-            arr.remove(idRole);
+            arr.remove((Integer)idRole);
             RoleService.gI().setPropertyRole(p, idRole);
+            if(idRole == Constaint.ROLE_THAYDONG){
+                game.playersInHell.add(p);
+            }
+            System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
             MessageService.gI().sendMessagePrivate(p, 
                     new Message(Constaint.MESSAGE_PICK_ROLE,idRole));
         }
+        
+        game.players.forEach(p -> {
+            p.game = game;
+            if(p.playerEffect.isWolfTeam()){
+                game.teamWolf.add(p);
+            }
+        });
     }
+    
     
     /**
      *
@@ -198,19 +243,18 @@ public class RoleService implements TemplateService{
         List<Integer> arr = new ArrayList<>();
         //Mặc định 100% có 1 tiên tri, 1 bác sĩ sói tiên tri và 2 sói thường, 
         //Có 50% có cơ hội thêm 1 con sói
-        int count = 6;
+        int count = 5;
         //100% dân làng
         arr.add((int)Constaint.ROLE_TIENTRI);
         arr.add((int)Constaint.ROLE_BACSI);
         //100% sói
         arr.add((int)Constaint.ROLE_SOITIENTRI);
         arr.add((int)Constaint.ROLE_SOI);
-        arr.add((int)Constaint.ROLE_SOI);
         //Trúng thưởng thêm sói
         boolean hasExtraWolf = RandomUtils.isTrue(50, 100);
         if(hasExtraWolf){
             arr.add((int)Constaint.ROLE_SOI);
-            count = 5;
+            count = 4;
         }
         // 0 - 7: các role dân làng
         List<Integer> rolesVillage = new ArrayList<>(){};

@@ -13,6 +13,10 @@ public class Login extends javax.swing.JPanel {
      */
     public Login() {
         initComponents();
+        String username = "admin";
+        if(Utils.StringUtils.isValidUsername(username)){
+            Service.gI().init(username);
+        }
     }
 
     /**
