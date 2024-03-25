@@ -78,11 +78,11 @@ public class MainFrame extends javax.swing.JFrame {
 
             },
             new String [] {
-                "Name", "Room"
+                "Name", "Room", "Win"
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Integer.class
+                java.lang.String.class, java.lang.Integer.class, java.lang.Integer.class
             };
 
             public Class getColumnClass(int columnIndex) {

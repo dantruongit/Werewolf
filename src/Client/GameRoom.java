@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.text.DefaultCaret;
 
 /**
  *
@@ -23,17 +24,19 @@ import java.util.List;
 public class GameRoom extends javax.swing.JPanel {
     public boolean hasShowTutorial = false;
     private final String idRoomOwner; 
-    private byte gameStage;
-    private byte idRole ;
+    private byte idRole = -128;
     public boolean disableSpecial = false;
     private final List<String> teammateWolfs = new ArrayList<>();
     private String lastUserInteracted = "";
+    private boolean hasInteraction = false;
+    //Đây là lần đầu nhận role
+    private boolean isFirstPickRole = true;
     
     private class PlayerUI{
         public int index;
         public JLabel avatar, voteIcon, iconRole, name, vote, function;
         public Player p;
-        public boolean isDie;
+        public boolean isDie = false;
         
         public void setAvatar(JLabel avatar) {
             this.avatar = avatar;
@@ -72,8 +75,7 @@ public class GameRoom extends javax.swing.JPanel {
             this.function.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
-                    System.out.println("Function clicked " + getUsername());
-                    if(isDie) return;
+                    if(isDie && idRole != Constaint.ROLE_THAYDONG) return;
                     try {
                         String username = getUsername();
                         if(idRole == Constaint.ROLE_BACSI) {
@@ -119,6 +121,7 @@ public class GameRoom extends javax.swing.JPanel {
                                 }
                                 case Constaint.ROLE_THAYDONG:{
                                     Service.gI().sendMessage(Constaint.MESSAGE_THAYDONG_HOISINH, username);
+                                    addMessage("Bạn đã chọn hồi sinh người chơi " +username+ ".");
                                     disableSpecial = true;
                                     turnOnBtnFunction(false);
                                     break;
@@ -219,7 +222,7 @@ public class GameRoom extends javax.swing.JPanel {
                 this.avatar.setIcon(icon);
             }
             else{
-                int avatarId  = Utils.RandomUtils.nextInt(1, 16);
+                byte avatarId  = p.avatarId;
                 avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar/avatar_" + avatarId+ ".jpg", 75, 75));
             }
             String currentNamePlayer = Service.gI().dataSource.player.namePlayer;
@@ -230,7 +233,6 @@ public class GameRoom extends javax.swing.JPanel {
             }
             if(idRoomOwner.equals(p.namePlayer)){
                 String path = Constaint.pathRoot + "/assets/crown.png";
-                System.out.println(path);
                 this.iconRole.setIcon(gui.resizeImage
                     (path, 24, 24));
                 this.iconRole.setVisible(true);
@@ -318,6 +320,9 @@ public class GameRoom extends javax.swing.JPanel {
     public void addMessage(String message){
         String old = txtChat.getText();
         txtChat.setText(old + "\n" + message);
+        DefaultCaret caret = (DefaultCaret)txtChat.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.OUT_BOTTOM);
+        //caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
     }
     
     /**
@@ -327,7 +332,6 @@ public class GameRoom extends javax.swing.JPanel {
     public void updateStage(Stage stage){
         lastUserInteracted = "";
         turnFunction = false;
-        gameStage = stage.currentStage;
         for(PlayerUI pUI: playersUI){
             //Ẩn cái nút chức năng đi
             pUI.function.setVisible(false);
@@ -341,6 +345,7 @@ public class GameRoom extends javax.swing.JPanel {
                 && (stage.currentStage == Constaint.STAGE_DISCUSSING || stage.currentStage == Constaint.STAGE_VOTING )){
             turnOnBtnFunction(true);
         }
+        
         gui.changePanel(mainPanel, new PanelTime(stage));
     }
     
@@ -349,6 +354,8 @@ public class GameRoom extends javax.swing.JPanel {
      * Bật chế độ ban ngày cho UI
      */
     public void turnDay(){
+        if(idRole != -128)
+            gui.playSound("rooster");
         Color day = new Color(242, 242, 242);
         txtInput.setBackground(day);
         txtChat.setBackground(day);
@@ -378,6 +385,7 @@ public class GameRoom extends javax.swing.JPanel {
     }
     
     public void turnNight(){
+        gui.playSound("wolf");
         Color day = new Color(153, 153, 153);
         txtInput.setBackground(day);
         txtChat.setBackground(day);
@@ -434,13 +442,41 @@ public class GameRoom extends javax.swing.JPanel {
                 var icon = gui.resizeImage(pathAvatar, 75, 75);
                 u.avatar.setIcon(icon);
                 u.isDie = true;
+                gui.playSound("playerdie");
             }
         }
         if(pTarget.namePlayer.equals(thisUI.getUsername())){
             thisUI.isDie = true;
-            txtInput.setEditable(false);
+            txtInput.setEnabled(false);
             disableSpecial = true;
             addMessage("Bạn đã bị giết.");
+        }
+    }
+    
+    public void setRevivalPlayer(Player pTarget, byte role){
+        for(var u: playersUI){
+            if(u.getUsername().equals(pTarget.namePlayer)){
+                String pathRole;
+                if(role == -1){
+                    pathRole = Constaint.pathRoot + "/assets/icon_role/icon_role_-1.png";
+                }
+                else{
+                    pathRole = Constaint.pathRoot + "/assets/icon_role/icon_role" + role + ".png";
+                }
+                var iconRole = gui.resizeImage(pathRole, 36, 36);
+                u.iconRole.setIcon(iconRole);
+                u.iconRole.setVisible(true);
+                
+                var pathAvatar = Constaint.pathRoot + "/assets/avatar/avatar_1.jpg";
+                var icon = gui.resizeImage(pathAvatar, 75, 75);
+                u.avatar.setIcon(icon);
+                u.isDie = false;
+            }
+        }
+        if(pTarget.namePlayer.equals(thisUI.getUsername())){
+            thisUI.isDie = false;
+            txtInput.setEnabled(true);
+            addMessage("Bạn đã được hồi sinh bởi Thầy đồng.");
         }
     }
     
@@ -479,24 +515,84 @@ public class GameRoom extends javax.swing.JPanel {
      */
     public void setRoleMySelf(byte idRole){
         this.idRole = idRole;
-        new Thread(()->{
+        if(isFirstPickRole){
+            isFirstPickRole = false;
+            new Thread(()->{
+                PlayerUI uj = null;
+                for(PlayerUI u: playersUI){
+                    if(u.p != null && u.p.namePlayer.equals(Service.gI().dataSource.player.namePlayer)) {
+                        uj = u;
+                    }
+                }
+                try {
+                    for(int i = 0 ; i < 30;i++){
+                        Thread.sleep(50);
+                        byte rd = (byte)Utils.RandomUtils.nextInt(0, 9);
+                        if(uj != null){
+                            String path = Constaint.pathRoot + "/assets/icon_role/icon_role" + rd + ".png";
+                            uj.iconRole.setIcon(gui.resizeImage(path, 36, 36));
+                            uj.iconRole.setVisible(true);
+                        }
+                    }
+                } catch (Exception e) {
+                }
+                if(uj != null){
+                    String path = Constaint.pathRoot + "/assets/icon_role/icon_role" + idRole + ".png";
+                    uj.iconRole.setIcon(gui.resizeImage(path, 36, 36));
+                }
+                //Set icon function cho cái nút
+                String imgFunction = "none.png";
+                switch(idRole){
+                    case Constaint.ROLE_XATHU:{
+                        imgFunction = "gunner_bullet.png";
+                        break;
+                    }
+                    case Constaint.ROLE_THAYBOI:{
+                        imgFunction = "seek.png";
+                        break;
+                    }
+                    case Constaint.ROLE_TIENTRI:{
+                        imgFunction = "seekVip.png";
+                        break;
+                    }
+                    case Constaint.ROLE_BACSI:{
+                        imgFunction = "protect.png";
+                        break;
+                    }
+                    case Constaint.ROLE_THAYDONG:{
+                        imgFunction = "revival.png";
+                        break;
+                    }
+                    case Constaint.ROLE_SOITIENTRI:{
+                        imgFunction = "seekWolf.png";
+                        break;
+                    }
+                    case Constaint.ROLE_SOI:{
+                        imgFunction = "wolf.png";
+                        break;
+                    }
+                }
+                hasInteraction = !imgFunction.equals("none.png");
+                var path = Constaint.pathRoot + "/assets/function/" + imgFunction;
+                var icon = gui.resizeImage(path, 40, 40);
+                btnFunction.setIcon(icon);
+                //btnFunction.setEnabled(turnFunction && !disableSpecial);
+                if(!imgFunction.equals("none.png")){
+                    var pathSelectable = Constaint.pathRoot + "/assets/function/selectable_" + imgFunction;
+                    var iconFunction = gui.resizeImage(pathSelectable, 50, 50);
+                    for(var u: playersUI){
+                        u.function.setIcon(iconFunction);
+                    }
+                }
+                addMessage("Bạn đã nhận được vai trò " + Utils.StringUtils.getRoleNameById(idRole));
+            }).start();
+        }
+        else{
             PlayerUI uj = null;
             for(PlayerUI u: playersUI){
                 if(u.p != null && u.p.namePlayer.equals(Service.gI().dataSource.player.namePlayer)) {
                     uj = u;
                 }
-            }
-            try {
-                for(int i = 0 ; i < 30;i++){
-                    Thread.sleep(50);
-                    byte rd = (byte)Utils.RandomUtils.nextInt(0, 9);
-                    if(uj != null){
-                        String path = Constaint.pathRoot + "/assets/icon_role/icon_role" + rd + ".png";
-                        uj.iconRole.setIcon(gui.resizeImage(path, 36, 36));
-                        uj.iconRole.setVisible(true);
-                    }
-                }
-            } catch (Exception e) {
             }
             if(uj != null){
                 String path = Constaint.pathRoot + "/assets/icon_role/icon_role" + idRole + ".png";
@@ -505,35 +601,12 @@ public class GameRoom extends javax.swing.JPanel {
             //Set icon function cho cái nút
             String imgFunction = "none.png";
             switch(idRole){
-                case Constaint.ROLE_XATHU:{
-                    imgFunction = "gunner_bullet.png";
-                    break;
-                }
-                case Constaint.ROLE_THAYBOI:{
-                    imgFunction = "seek.png";
-                    break;
-                }
-                case Constaint.ROLE_TIENTRI:{
-                    imgFunction = "seekVip.png";
-                    break;
-                }
-                case Constaint.ROLE_BACSI:{
-                    imgFunction = "protect.png";
-                    break;
-                }
-                case Constaint.ROLE_THAYDONG:{
-                    imgFunction = "revival.png";
-                    break;
-                }
-                case Constaint.ROLE_SOITIENTRI:{
-                    imgFunction = "seekWolf.png";
-                    break;
-                }
                 case Constaint.ROLE_SOI:{
                     imgFunction = "wolf.png";
                     break;
                 }
             }
+            hasInteraction = !imgFunction.equals("none.png");
             var path = Constaint.pathRoot + "/assets/function/" + imgFunction;
             var icon = gui.resizeImage(path, 40, 40);
             btnFunction.setIcon(icon);
@@ -545,8 +618,8 @@ public class GameRoom extends javax.swing.JPanel {
                     u.function.setIcon(iconFunction);
                 }
             }
-            addMessage("Bạn đã nhận được vai trò " + Utils.StringUtils.getRoleNameById(idRole));
-        }).start();
+        }
+        
     }
     
     /**
@@ -637,7 +710,6 @@ public class GameRoom extends javax.swing.JPanel {
         name8 = new javax.swing.JLabel();
         roleUser8 = new javax.swing.JLabel();
         mainPanel = new javax.swing.JPanel();
-        jButton1 = new javax.swing.JButton();
 
         jPanel2.setForeground(new java.awt.Color(255, 255, 255));
         jPanel2.setMinimumSize(new java.awt.Dimension(860, 502));
@@ -991,15 +1063,6 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(mainPanel);
         mainPanel.setBounds(400, 20, 380, 90);
 
-        jButton1.setText("Add bot");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-        jPanel2.add(jButton1);
-        jButton1.setBounds(0, 0, 110, 22);
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1026,9 +1089,15 @@ public class GameRoom extends javax.swing.JPanel {
     }
     
     private void btnFunctionActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnFunctionActionPerformed
+        if(!hasInteraction) return;
         turnFunction = !turnFunction;
         for(var u: playersUI){
-            if(!teammateWolfs.contains(u.getUsername()) && !u.isDie)
+            //Nếu là thầy đồng thì hiện các player ngỏm
+            if(idRole == Constaint.ROLE_THAYDONG && u.isDie && !u.getUsername().equals(thisUI.getUsername())){
+                u.function.setVisible(turnFunction);
+            }
+            //Còn lại là sói không chọn người chết và sói khác
+            else if(idRole == Constaint.ROLE_SOI && !teammateWolfs.contains(u.getUsername()) && !u.isDie)
                 u.function.setVisible(turnFunction);
         }
     }//GEN-LAST:event_btnFunctionActionPerformed
@@ -1039,14 +1108,8 @@ public class GameRoom extends javax.swing.JPanel {
             return;
         }
         txtInput.setText("");
-        byte typeMessage = Constaint.MESSAGE_CHAT;
-        if(thisUI.isDie){
-            typeMessage = Constaint.MESSAGE_CHAT_FROM_HELL;
-        }
-        else if(!teammateWolfs.isEmpty() && gameStage == Constaint.STAGE_SLEEPING){
-            typeMessage = Constaint.MESSAGE_CHAT_FROM_WOLF;
-        }
-        Service.gI().sendMessage(typeMessage, content);
+        byte typeSend = idRole == -128 ? Constaint.MESSAGE_CHAT : Constaint.MESSAGE_CHAT_IN_GAME;
+        Service.gI().sendMessage(typeSend, content);
     }
     
     private void btnExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnExitActionPerformed
@@ -1062,10 +1125,6 @@ public class GameRoom extends javax.swing.JPanel {
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         Service.gI().sendMessage(Constaint.MESSAGE_START_GAME, null);
     }//GEN-LAST:event_btnStartActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        Service.gI().sendMessage(Constaint.ADD_BOT, null);
-    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1099,7 +1158,6 @@ public class GameRoom extends javax.swing.JPanel {
     private javax.swing.JLabel hand6;
     private javax.swing.JLabel hand7;
     private javax.swing.JLabel hand8;
-    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel mainPanel;

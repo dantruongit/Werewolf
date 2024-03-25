@@ -8,7 +8,7 @@ public class Writer {
     public ObjectOutputStream oos;
     public void writeMessage(Message message){
         try {
-            System.out.println("Send " + message.getMessageCode());
+            //System.out.println("Send " + message.getMessageCode());
             oos.writeObject(message);
             oos.reset();
             oos.flush();

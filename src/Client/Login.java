@@ -1,6 +1,8 @@
 package Client;
 
 import Client.Session.Service;
+import Client.utils.gui;
+import config.Constaint;
 
 /**
  *
@@ -13,10 +15,6 @@ public class Login extends javax.swing.JPanel {
      */
     public Login() {
         initComponents();
-        String username = "admin";
-        if(Utils.StringUtils.isValidUsername(username)){
-            Service.gI().init(username);
-        }
     }
 
     /**
@@ -28,6 +26,7 @@ public class Login extends javax.swing.JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        avatar = new javax.swing.JLabel();
         labelIconGame = new javax.swing.JLabel();
         txtUsername = new javax.swing.JTextField();
         btnStartGame = new javax.swing.JButton();
@@ -48,6 +47,16 @@ public class Login extends javax.swing.JPanel {
 
         setLayout(null);
 
+        avatar.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
+        avatar.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/avatar/avatar_1.jpg"))); // NOI18N
+        avatar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                avatarMouseClicked(evt);
+            }
+        });
+        add(avatar);
+        avatar.setBounds(170, 310, 160, 110);
+
         labelIconGame.setBackground(new java.awt.Color(51, 51, 51));
         labelIconGame.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/icon_no_transparent.png"))); // NOI18N
         add(labelIconGame);
@@ -56,7 +65,7 @@ public class Login extends javax.swing.JPanel {
         txtUsername.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         txtUsername.setToolTipText("Nhập username (<13 kí tự từ a-z, 0-9)");
         add(txtUsername);
-        txtUsername.setBounds(280, 270, 320, 40);
+        txtUsername.setBounds(350, 310, 250, 40);
 
         btnStartGame.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
         btnStartGame.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/start.png"))); // NOI18N
@@ -67,7 +76,7 @@ public class Login extends javax.swing.JPanel {
             }
         });
         add(btnStartGame);
-        btnStartGame.setBounds(360, 330, 140, 50);
+        btnStartGame.setBounds(350, 370, 250, 50);
 
         jLabel2.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/assets/background/4.png"))); // NOI18N
@@ -139,16 +148,27 @@ public class Login extends javax.swing.JPanel {
         add(jLabel15);
         jLabel15.setBounds(-50, 310, 350, 200);
     }// </editor-fold>//GEN-END:initComponents
-
+    
+    int indexAvatar = 1;
+    
     private void btnStartGameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartGameActionPerformed
         String username = txtUsername.getText();
         if(Utils.StringUtils.isValidUsername(username)){
-            Service.gI().init(username);
+            Service.gI().init(username, indexAvatar);
         }
     }//GEN-LAST:event_btnStartGameActionPerformed
 
+    private void avatarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_avatarMouseClicked
+        indexAvatar++;
+        if(indexAvatar > 16){
+            indexAvatar = 1;
+        }
+        avatar.setIcon(gui.resizeImage(Constaint.pathRoot + "/assets/avatar/avatar_" + indexAvatar + ".jpg", 75, 75));
+    }//GEN-LAST:event_avatarMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel avatar;
     private javax.swing.JButton btnStartGame;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

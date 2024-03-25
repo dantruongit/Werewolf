@@ -23,7 +23,6 @@ public class Room_List extends javax.swing.JPanel {
         model.setRowCount(0);
         List<Room> rooms = Service.gI().dataSource.rooms;
         if(rooms != null){
-            System.out.println("Room bị null");
             for(var r: rooms){
                 if(r != null)
                 model.addRow(new Object[]{

@@ -33,8 +33,9 @@ public class Service {
     
     public DataSource dataSource = new DataSource();
     
-    public void init(String username){
+    public void init(String username, int image){
         dataSource.player.namePlayer = username;
+        dataSource.player.avatarId = (byte)image;
         //Join server
         this.sendMessage(Constaint.MESSAGE_JOIN_SERVER, this.dataSource.player);
         this.sendMessage(Constaint.MESSAGE_LOAD_ROOM, null);

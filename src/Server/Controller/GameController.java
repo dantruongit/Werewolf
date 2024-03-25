@@ -61,7 +61,18 @@ public class GameController {
         return null;
     }
     
+    public static GameController getGameByRoom(Room room){
+        for(var gC: games){
+            if(gC.game.room.idRoom == room.idRoom){
+                return gC;
+            }
+        }
+        return null;
+    }
     
+    public void leavePlayer(Player p){
+        game.players.remove(p);
+    }
     
     /**
      *
@@ -125,7 +136,7 @@ public class GameController {
             if(p.isBot) continue;
             Message message = new Message();
             //Chưa ngỏm thì gọi dậy thực hiện vai trò xạ thủ
-            if(!p.isDie && p.playerEffect.idRole == Constaint.ROLE_XATHU){
+            if(!p.isDie && p.playerEffect.isXaThu){
                 message.setMessageCode(Constaint.WakeUp.ROLE_XATHU);
                 MessageService.gI().sendMessagePrivate(p, message);
             }
@@ -150,9 +161,14 @@ public class GameController {
         return null;
     }
     
+    private Player getFirstPlayerByRole(byte role){
+        for(var p: game.players) if(p.playerEffect.idRole == role) return p;
+        return null;
+    }
+    
     private void alertVoteInDay(){
         String content = String.format("[Server]: Đến giờ bỏ phiếu ! Tối thiểu %d phiếu.", 
-                (game.players.size() - game.playersInHell.size() + 1) / 2) ;
+                game.getPlayerAlive() / 2) ;
         Message message = new Message(Constaint.MESSAGE_CHAT, content);
         MessageService.gI().sendMessageInRoom(game, message);
     }
@@ -179,11 +195,19 @@ public class GameController {
     }
     
     private void setDiePlayer(Player p){
+        p.isDie = true;
         Message message = new Message(Constaint.MESSAGE_PLAYER_DIE, p);
         Byte bite = game.isShowRoleWhenDie ? p.playerEffect.idRole : -1;
         message.setTmp(bite);
         MessageService.gI().sendMessageInRoom(game, message);
-        game.playersInHell.add(p);
+    }
+    
+    private void setRevivalPlayer(Player p){
+        p.isDie = false;
+        Message message = new Message(Constaint.MESSAGE_PLAYER_REVIVAL, p);
+        Byte bite = game.isShowRoleWhenDie ? p.playerEffect.idRole : -1;
+        message.setTmp(bite);
+        MessageService.gI().sendMessageInRoom(game, message);
     }
     
     private void showRolePlayer(Player source){
@@ -191,19 +215,71 @@ public class GameController {
         MessageService.gI().sendMessageInRoom(game, message);
     }
     
+    private void calculateWinGame(){
+        int wolfLeft = 0;
+        int playerLeft = game.getPlayerAlive();
+        for(var p: game.players){
+            //Chưa ngỏm và là sói 
+            if(!p.isDie && p.playerEffect.isWolfTeam()){
+                wolfLeft+=1;
+            }
+        }
+        boolean isWolfWin = wolfLeft * 2 >= playerLeft;
+        boolean isVillagerWin = wolfLeft == 0;
+        Message message = new Message();
+        message.setData(null);
+        //Xử lý wolf chiến thắng
+        if(isWolfWin){
+            message.setMessageCode(Constaint.MESSAGE_WOLFS_WIN);
+            //Cộng điểm cho các players
+            game.teamWolf.forEach(wolf ->{
+                wolf.gameWin += 1;
+            });
+            MessageService.gI().sendMessageInRoom(game, message);
+            PlayerService.gI().update();
+        } 
+        //Xử lý khi dân làng chiến thắng
+        else if(isVillagerWin){
+            message.setMessageCode(Constaint.MESSAGE_VILLAGERS_WIN);
+            //Cộng điểm cho các players
+            game.players.forEach(p ->{
+                if(p.playerEffect.isVillage()) p.gameWin +=1;
+            });
+            MessageService.gI().sendMessageInRoom(game, message);
+            PlayerService.gI().update();
+        }
+        
+        if(isVillagerWin || isWolfWin) endGame();
+    }
+    
     private void calculateStage(){
         try {
-            List<Player> playersDie = getPlayerVoteDie();
-//            List<Player> playersDie = new ArrayList<>();
-//            playersDie.add(getPlayerByUsername("admin"));
-            if(playersDie.size() == 1){
+            List<Player> playersVoted = getPlayerVoteDie();
+//            List<Player> playersVoted = new ArrayList<>();
+//            playersVoted.add(getPlayerByUsername("3"));
+            if(playersVoted.size() == 1){
                 String content;
-                Player playerDie = playersDie.get(0);
+                Player pTarget = playersVoted.get(0);
+                if(pTarget.isDie) return;
                 //Vote ban đêm của sói
                 if(gameState == Constaint.STAGE_SLEEPING){
-                    if(!playerDie.playerEffect.duocBaoVe){
-                        content = String.format("[Server]: Người chơi %s đã bị sói cắn chết đêm qua.", playerDie.namePlayer);
-                        setDiePlayer(playerDie);
+                    //Không được bảo vệ 
+                    if(!pTarget.playerEffect.duocBaoVe){
+                        //Không phải bán sói thì cho đi luôn
+                        if(!pTarget.playerEffect.isBanSoi){
+                            content = String.format("[Server]: Người chơi %s đã bị sói cắn chết đêm qua.", pTarget.namePlayer);
+                            setDiePlayer(pTarget);
+                        }
+                        //Biến nó thành sói
+                        else{
+                            content = "[Server]: Không có ai chết đêm qua cả.";
+                            MessageService.gI().sendMessagePrivate(pTarget, 
+                                    new Message(Constaint.MESSAGE_CHAT,"Bạn đã bị biến thành ma sói do bị sói cắn."));
+                            changeRoleOfPlayer(pTarget, Constaint.ROLE_SOI);
+                            game.teamWolf.add(pTarget);
+                            seeOtherWolf();
+                        }
+                        calculateWinGame();
                     }
                     else{
                         content = "[Server]: Không có ai chết đêm qua cả.";
@@ -214,11 +290,22 @@ public class GameController {
                 }
                 //Vote ban ngày của dân
                 else{
-                    setDiePlayer(playerDie);
-                    content = "[Server]: " + playerDie.namePlayer +" đã bị dân làng treo cổ.";
+                    setDiePlayer(pTarget);
+                    content = "[Server]: " + pTarget.namePlayer +" đã bị dân làng treo cổ.";
                     Message message = new Message(Constaint.MESSAGE_CHAT, 
                         content);
                     MessageService.gI().sendMessageInRoom(game, message);
+                    //Vote vào thằng ngố
+                    if(pTarget.playerEffect.isChuaHe){
+                        message.setMessageCode(Constaint.MESSAGE_JOKER_WIN);
+                        //Cộng điểm cho player
+                        pTarget.gameWin += 1;
+                        MessageService.gI().sendMessageInRoom(game, message);
+                        PlayerService.gI().update();
+                        endGame();
+                    }
+                    else
+                        calculateWinGame();
                 }
             }
             //Không có phiếu bầu hoặc nhiều phiếu giống nhau
@@ -231,6 +318,31 @@ public class GameController {
             }
             Thread.sleep(1000);
         } catch (Exception e) {
+        }
+    }
+    
+    private void changeRoleOfPlayer(Player pTarget, byte newRole){
+        pTarget.playerEffect.idRole = newRole;
+        RoleService.gI().setPropertyRole(pTarget, newRole);
+        MessageService.gI().sendMessagePrivate(pTarget, 
+            new Message(Constaint.MESSAGE_PICK_ROLE,newRole));
+    }
+    
+    private void checkIfOnlySeekWolfLeft(){
+        boolean isOnlySeekWolfLeft = true;
+        for(var p : game.players){
+            //Chưa hẹo và là sói thì tức là sai
+            if(!p.isDie && p.playerEffect.isSoi){
+                isOnlySeekWolfLeft = false;
+                break;
+            }
+        }
+        if(isOnlySeekWolfLeft){
+            Player seekWolf = getFirstPlayerByRole(Constaint.ROLE_SOITIENTRI);
+            //Có sói tiên tri và chưa hẹo thì biến nó thành sói thường
+            if(seekWolf != null && !seekWolf.isDie){
+                changeRoleOfPlayer(seekWolf, Constaint.ROLE_SOI);
+            }
         }
     }
     
@@ -258,8 +370,6 @@ public class GameController {
     }
     
     private void start(){
-        System.out.println("Players " + game.players);
-        System.out.println("Wolf " + game.teamWolf);
         task = new TaskInterval() {
             @Override
             public void main() {
@@ -272,6 +382,13 @@ public class GameController {
                 switch(currentState){
                     //Thảo luận ban ngày
                     case Constaint.STAGE_DISCUSSING:{
+                        if(game.lastPlayerRevival != null){
+                            setRevivalPlayer(game.lastPlayerRevival);
+                            //Thông báo
+                            MessageService.gI().sendMessageInRoom(game, new Message(Constaint.MESSAGE_CHAT,
+                                "[Server]: Người chơi " + game.lastPlayerRevival.namePlayer +" đã được hồi sinh bởi Thầy đồng."));
+                            game.lastPlayerRevival = null;
+                        }
                         delay = Constaint.Time.TIME_DISCUSSING;
                         //Gọi xạ thủ dậy
                         wakeUpShooter();
@@ -290,6 +407,8 @@ public class GameController {
                     //Gọi các vai trò dậy ở ban đêm ở đây, voting sói các kiểu
                     case Constaint.STAGE_SLEEPING:{
                         delay = Constaint.Time.TIME_SLEEPING;
+                        //Kiểm tra xem có duy nhất sói tiên tri thì biến nó thành sói thường
+                        checkIfOnlySeekWolfLeft();
                         //Gọi các vai trò đặc biệt dậy
                         wakeUpSpecial();
                         //Gửi danh sách mấy con sói cho nhau
@@ -301,7 +420,7 @@ public class GameController {
                 }
                 //Kết thúc stage
                 try {
-                    Thread.sleep(delay + 800);
+                    Thread.sleep(delay + 2800);
                 } catch (Exception e) {
                 }
                 //Tính toán kết quả stage và thông báo cho players
@@ -313,6 +432,21 @@ public class GameController {
             }
         };
         task.start();
+    }
+    
+    private void endGame(){
+        //Dừng task interval lại
+        task.flag = false;
+        task.interrupt();
+        //Clear effect của các player
+        for(var p: game.players){
+            p.isDie = false;
+            p.game = null;
+            p.playerEffect = new PlayerEffect();
+            p.playerVote = new PlayerVote();
+        }
+        //Xóa game 
+        games.removeIf(gController -> gController.game.idGame == game.idGame);
     }
     
     //Update game
@@ -341,9 +475,34 @@ public class GameController {
     public void processMessage(Player player, Message message){
         switch(message.getMessageCode()){
             //Done
+            case Constaint.MESSAGE_CHAT_IN_GAME:{
+                String cont = player.namePlayer + ": " + message.getData();
+                Message msg = new Message(Constaint.MESSAGE_CHAT, cont);
+                //Người chết nói chuyện với nhau
+                if(gameState == Constaint.STAGE_SLEEPING && (player.isDie || player.playerEffect.isThayDong)){
+                    if(player.playerEffect.isThayDong && !player.isDie){
+                        msg.setData((String)"Thầy đồng: " + message.getData());
+                    }
+                    else{
+                        msg.setData("[HELL] " + cont);
+                    }
+                    MessageService.gI().sendMessageForTeam(game.players, msg,Constaint.TEAM_HELL, true);
+                }
+                //Sói chat với nhau vào ban đêm
+                else if(gameState == Constaint.STAGE_SLEEPING && player.playerEffect.isWolfTeam()){
+                    msg.setData("[WOLF] " + cont);
+                    MessageService.gI().sendMessageForTeam(game.players, msg,Constaint.TEAM_WOLF, false);
+                }
+                //Chat ban ngày bình thường
+                else{
+                    MessageService.gI().sendMessageInRoom(game, msg);
+                }
+                break;
+            }
+            //Done
             case Constaint.MESSAGE_PLAYER_VOTES:{
                 String targetVote = (String)message.getData();
-                if(gameState == Constaint.STAGE_VOTING){
+                if(gameState == Constaint.STAGE_VOTING && !player.isDie){
                     Player pTarget = getPlayerByUsername(targetVote);
                     //Nếu trước đó có vote cho ai khác thì gỡ đi
                     if(player.playerVote.target != null){
@@ -377,8 +536,10 @@ public class GameController {
                     player.playerEffect.bullet--;
                     player.playerEffect.isShowRole = true;
                     //Hủy vote của đối tượng bị bắn và setDie
-                    target.isDie = true;
-                    target.playerVote.target = null;
+                    if(target.playerVote.target != null){
+                        target.playerVote.target.playerVote.voteCount -= 1;
+                        target.playerVote.target = null;
+                    }
                     target.playerVote.voteCount = 0;
                     //Hủy vote của mọi người vào đối tượng bị bắn
                     for(var p : game.players){
@@ -406,7 +567,6 @@ public class GameController {
             }
             //Done
             case Constaint.MESSAGE_WOLF_VOTES:{
-                System.out.println("[ReceiveVote] " + message.getData().toString());
                 String targetVote = (String)message.getData();
                 if(player.game.gameState == Constaint.STAGE_SLEEPING){
                     Player pTarget = getPlayerByUsername(targetVote);
@@ -480,24 +640,16 @@ public class GameController {
             }
             
             case Constaint.MESSAGE_THAYDONG_HOISINH:{
-                break;
-            }
-            case Constaint.MESSAGE_CHAT_FROM_HELL:{
-                String content;
-                if(player.playerEffect.isThayDong){
-                    content = "Thầy đồng: " + (String)message.getData();
+                Player pRevival = getPlayerByUsername((String)message.getData());
+                if(player.playerEffect.isThayDong && player.playerEffect.revivalTime > 0){
+                    player.playerEffect.revivalTime -= 1;
+                    game.lastPlayerRevival = pRevival;
                 }
-                else{
-                    content = player.namePlayer + ": " + (String)message.getData();
-                }
-                Message msg = new Message(Constaint.MESSAGE_CHAT_FROM_HELL, content);
-                MessageService.gI().sendMessagePrivate(player.game.playersInHell, msg);
                 break;
             }
             
             //Done
             case Constaint.MESSAGE_SOITIENTRI_SEE:{
-                System.out.println("Wolf team : " + game.teamWolf);
                 Player pTarget = RoomService.gI().getPlayerByUsername(player.room, (String)message.getData());
                 if(!pTarget.isDie){
                     Message msg =  new Message(Constaint.MESSAGE_SOITIENTRI_SEE, pTarget);
@@ -505,9 +657,6 @@ public class GameController {
                     MessageService.gI().sendMessagePrivate(player.game.teamWolf,
                             msg);
                 }
-                break;
-            }
-            case Constaint.MESSAGE_CHAT_FROM_WOLF:{
                 break;
             }
         }

@@ -14,6 +14,13 @@ public class Game implements Serializable{
     public boolean isShootSameDay = false;
     public List<Player> players = new ArrayList<>();
     transient public List<Player> teamWolf = new ArrayList<>();
-    public List<Player> playersInHell = new ArrayList<>();
+    public Player lastPlayerRevival = null;
     
+    public int getPlayerAlive(){
+        int cnt = 0;
+        for(var p: players){
+            if(!p.isDie) cnt += 1;
+        }
+        return cnt;
+    }
 }

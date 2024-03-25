@@ -57,7 +57,7 @@ public class SocketService implements TemplateService{
                 writer.writeObject(msg); 
                 writer.reset();
                 writer.flush();
-                System.out.println("Send: " + msg.getMessageCode() + " " + msg.getData().toString());
+                //System.out.println("Send: " + msg.getMessageCode() + " " + msg.getData().toString());
             } catch (Exception e) {
                 
             }
@@ -68,25 +68,17 @@ public class SocketService implements TemplateService{
             while(true){
                 try {
                     Message message = (Message)reader.readObject();
-                    System.out.println("Receive: " + message.getMessageCode());
+                    //System.out.println("Receive: " + message.getMessageCode());
                     Message response = new Message(message.getMessageCode(), null);
                     switch(message.getMessageCode()){
                         case Constaint.MESSAGE_JOIN_SERVER:{
                             Player p = (Player)message.getData();
                             Player old = PlayerService.gI().getPlayerByUsername(p.namePlayer);
                             if(old != null){
-//                                response.setData(null);
-                                p.namePlayer = System.currentTimeMillis() + "";
-                                p.playerEffect = new PlayerEffect();
-                                PlayerService.gI().players.add(p);
-                                PlayerService.gI().addPlayer(p);
-                                this.player = p;
-                                this.player.writer = writer;
-                                response.setData(p);
+                                response.setData(null);
                             }
                             else{
                                 p.playerEffect = new PlayerEffect();
-                                PlayerService.gI().players.add(p);
                                 PlayerService.gI().addPlayer(p);
                                 this.player = p;
                                 this.player.writer = writer;
@@ -119,7 +111,8 @@ public class SocketService implements TemplateService{
                         case Constaint.MESSAGE_JOIN_ROOM:{
                             int id = (int)message.getData();
                             Room room = RoomService.gI().getRoomById(id);
-                            if(room != null){
+                            GameController gC = GameController.getGameByRoom(room);
+                            if(room != null && gC == null){
                                 room.players.add(player);
                                 player.room = room;
                                 response.setData(room);
@@ -133,10 +126,10 @@ public class SocketService implements TemplateService{
                         }
                         case Constaint.ADD_BOT:{
                             Room room = RoomService.gI().getRoomById(player.room.idRoom);
-                            if(room != null){
+                            if(room != null && room.owner.namePlayer.equals(player.namePlayer)){
                                 int numBot = 9 - room.players.size();
                                 for(int i = 0; i < numBot; i++){
-                                    Player p = PlayerService.gI().bots.get(i);
+                                    Player p = PlayerService.gI().getBot(i);
                                     room.players.add(p);
                                     p.room = room;
                                 }
@@ -173,12 +166,16 @@ public class SocketService implements TemplateService{
                         }
                     }
                 } catch (ClassNotFoundException | IOException e) {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     if(player != null && player.room != null){
                         Room room = RoomService.gI().getRoomById(player.room.idRoom);
                         RoomService.gI().leavedPlayer(player, room);
                         RoomService.gI().reloadPlayer(room);
+                        if(GameController.gI(player) != null){
+                            GameController.gI(player).leavePlayer(player);
+                        }
                     }
+                    PlayerService.gI().removePlayer(player);
                     try {
                         reader.close();
                         writer.close();

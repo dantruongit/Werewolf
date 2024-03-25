@@ -19,8 +19,7 @@ public class ManagerService {
         
         //Mock up player
         for(int i = 1 ; i <= 8 ; i++){
-            AIPlayer p = PlayerService.gI().makeBot("" + i);
-            PlayerService.gI().bots.add(p);
+            PlayerService.gI().addBot("" + i);
         }
     }
     
@@ -30,6 +29,11 @@ public class ManagerService {
         SocketService.gI().stop();
     }
     
+    /**
+     * Hàm debug lỗi trong quá trình thực hiện action của Service
+     * @param x Service bị lỗi action
+     * @param action Hành động thực hiện bị lỗi/thất bại
+     */
     public static void err(TemplateService x, String action){
         System.err.println(x.getServiceName() + " " + action + " failed!");
         System.exit(0);

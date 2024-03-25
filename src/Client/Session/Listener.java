@@ -2,12 +2,16 @@ package Client.Session;
 
 import Client.GameRoom;
 import Client.HomePanel;
+import Client.Joker_WIN;
+import Client.Wolf_WIN;
 import Client.utils.gui;
 import Model.*;
 import Utils.StringUtils;
+import Were_Wolf_Display.Village_WIN;
 import config.Constaint;
 import java.io.ObjectInputStream;
 import java.util.List;
+import javax.swing.JPanel;
 import payload.Message;
 
 public class Listener extends Thread{
@@ -24,7 +28,7 @@ public class Listener extends Thread{
             try {
                 Message message = (Message)ois.readObject();
                 Object data = message.getData();
-                System.out.println("Receive : " + message.getMessageCode());
+//                System.out.println("Receive : " + message.getMessageCode());
                 switch(message.getMessageCode()){
                     case Constaint.MESSAGE_GET_CONFIG_ROLE:{
                         service.dataSource.roleConfigs = (List<Role>)data;
@@ -33,7 +37,6 @@ public class Listener extends Thread{
                     case Constaint.MESSAGE_CREATE_ROOM:{
                         Room room = (Room) data;
                         if(room != null){
-                            System.out.println("[CREATE] " +room.toString());
                             service.dataSource.player.room = room;
                             service.frm.changePanel(new GameRoom());
                         }
@@ -93,10 +96,10 @@ public class Listener extends Thread{
                         byte idRole = i.byteValue();
                         service.dataSource.player.playerEffect = new PlayerEffect();
                         service.dataSource.player.playerEffect.idRole = idRole;
-                        System.out.println("Role nhận được : " + idRole);
                         service.panelGame.setRoleMySelf(idRole);
                         break;
                     }
+                    //Done
                     case Constaint.STAGE_CHANGE:{
                         byte currentStage = (byte)data;
                         Stage stage;
@@ -116,6 +119,7 @@ public class Listener extends Thread{
                                 break;
                             }
                             case Constaint.STAGE_VOTING:{
+                                gui.playSound("votingbell");
                                 String messageStatus = Utils.StringUtils.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
                                 stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_VOTING);
                                 service.panelGame.updateStage(stage);
@@ -125,6 +129,7 @@ public class Listener extends Thread{
                         }
                         break;
                     }
+                    //Done
                     //Message đêm gọi các role dậy
                     case Constaint.WakeUp.ROLE_BACSI:
                     case Constaint.WakeUp.ROLE_SOI:
@@ -149,11 +154,18 @@ public class Listener extends Thread{
                         service.panelGame.reloadVotes(playerStates);
                         break;
                     }
-                    //Hiển thị role của người chơi
+                    //Bem người chơi và hiển thị role của họ
                     case Constaint.MESSAGE_PLAYER_DIE:{
                         Player pTarget = (Player)data;
                         byte role = (byte)message.getTmp();
                         service.panelGame.setDiePlayer(pTarget, role);
+                        break;
+                    }
+                    //Hồi sinh người chơi và hiển thị role của họ
+                    case Constaint.MESSAGE_PLAYER_REVIVAL:{
+                        Player pTarget = (Player)data;
+                        byte role = (byte)message.getTmp();
+                        service.panelGame.setRevivalPlayer(pTarget, role);
                         break;
                     }
                     //Nhận danh sách sói
@@ -194,13 +206,43 @@ public class Listener extends Thread{
                         service.panelGame.disableSpecial = true;
                         break;
                     }
+                    //End game
+                    case Constaint.MESSAGE_VILLAGERS_WIN:
+                    case Constaint.MESSAGE_WOLFS_WIN:
+                    case Constaint.MESSAGE_JOKER_WIN:{
+                        JPanel panelWin = null;
+                        switch(message.getMessageCode()){
+                            case Constaint.MESSAGE_VILLAGERS_WIN:{
+                                panelWin = new Village_WIN();
+                                break;
+                            }
+                            case Constaint.MESSAGE_WOLFS_WIN:{
+                                panelWin = new Wolf_WIN();
+                                break;
+                            }
+                            case Constaint.MESSAGE_JOKER_WIN:{
+                                panelWin = new Joker_WIN();
+                                break;
+                            }
+                        }
+                        if(panelWin != null)
+                            service.frm.changePanel(panelWin);
+                        new Thread(()->{
+                            try {
+                                Thread.sleep(3000);
+                                service.frm.changePanel(new GameRoom());
+                            } catch (Exception e) {
+                            }
+                        }).start();
+                        break;
+                    }
                     default:{
-                        System.out.println("[NotProcess] " + message.getMessageCode());
+                        //System.out.println("[NotProcess] " + message.getMessageCode());
                         break;
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                //e.printStackTrace();
             }
         }
     }

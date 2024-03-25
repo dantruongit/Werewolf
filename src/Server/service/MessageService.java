@@ -42,11 +42,12 @@ public class MessageService {
             PlayerEffect pE = p.playerEffect;
             if(p.writer != null){
                 boolean canSend = 
-                        team == Constaint.TEAM_WOLF && pE.isWolf() ||
-                        team == Constaint.TEAM_VILLAGE && pE.isVillage() ||
-                        team == Constaint.TEAM_THIRD && pE.isUnknown();
-                boolean canSendToDiePlayer = includeDiePlayer ? true : !p.isDie;
-                if(canSend && canSendToDiePlayer)
+                        (team == Constaint.TEAM_WOLF && pE.isWolfTeam())||
+                        (team == Constaint.TEAM_VILLAGE && pE.isVillage()) ||
+                        (team == Constaint.TEAM_THIRD && pE.isUnknown()) ||
+                        (team == Constaint.TEAM_HELL && (p.isDie || p.playerEffect.idRole == Constaint.ROLE_THAYDONG));
+                boolean sendToDiePlayer = includeDiePlayer ? true : !p.isDie;
+                if(canSend && sendToDiePlayer)
                     sendMessagePrivate(p, message);
             }
         }
@@ -60,7 +61,7 @@ public class MessageService {
             player.writer.flush();
             //System.out.println("[sendMessagePrivate] " + message.getMessageCode());
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
     

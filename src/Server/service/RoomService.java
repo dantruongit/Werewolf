@@ -1,6 +1,5 @@
 package Server.service;
 
-import Model.Game;
 import Model.Room;
 import Model.Player;
 import java.util.ArrayList;
@@ -52,24 +51,19 @@ public class RoomService implements TemplateService{
     
     public void leavedPlayer(Player target, Room room){
         try {
-            room.players.removeIf(p -> p.namePlayer == target.namePlayer);
+            room.players.removeIf(p -> p.namePlayer.equals(target.namePlayer));
             target.room = null;
-            if(room.owner.namePlayer == target.namePlayer && !room.startedGame){
+            if(room.owner.namePlayer.equals(target.namePlayer) && !room.startedGame){
                 removeRoom(room);
             }
             if(target.game != null){
-                target.game.players.removeIf(p -> p.namePlayer == target.namePlayer);
-                target.game.playersInHell.removeIf(p -> p.namePlayer == target.namePlayer);
+                target.game.players.removeIf(p -> p.namePlayer.equals(target.namePlayer));
             }
             MessageService.gI().sendMessageInRoom(room, 
                     new Message(Constaint.MESSAGE_CHAT, "[Server]: " + target.namePlayer + " đã rời khỏi phòng."));
         } catch (Exception e) {
             //e.printStackTrace();
         }
-    }
-    
-    public void startGame(Room room, Game game){
-        
     }
     
     public Player getPlayerByUsername(Room room, String username){

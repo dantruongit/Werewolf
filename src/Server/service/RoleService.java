@@ -3,6 +3,7 @@ package Server.service;
 import Model.Game;
 import Model.Role;
 import Model.Player;
+import Model.PlayerEffect;
 import Model.Room;
 import Utils.RandomUtils;
 import Utils.StringUtils;
@@ -40,7 +41,7 @@ public class RoleService implements TemplateService{
         roles.add(new Role(
                 Constaint.ROLE_DANLANG, 
                 "Dân làng", 
-                "Dân làng không có kỹ năng đặc biệt gì, chỉ ăn với ngủ",
+                "Thuộc phe dân làng, dân làng không có kỹ năng đặc biệt gì, chỉ ăn với ngủ",
                 Constaint.TEAM_VILLAGE,
                 1, 
                 8));
@@ -54,14 +55,14 @@ public class RoleService implements TemplateService{
         roles.add(new Role(
                 Constaint.ROLE_BACSI, 
                 "Bác sĩ", 
-                "Bạn có thể chọn bảo vệ 1 người vào ban ngày, ban đêm người đó sẽ không thể bị giết",
+                "Thuộc phe dân làng, bạn có thể chọn bảo vệ 1 người vào ban đêm, ban đêm người đó sẽ không thể bị giết bởi ma sói",
                 Constaint.TEAM_VILLAGE,
                 0, 
                 1));
         roles.add(new Role(
                 Constaint.ROLE_BANSOI, 
                 "Bán sói", 
-                "Bán sói là dân làng, nhưng bị cắn sẽ thành sói thay vì chết",
+                "Thuộc phe dân làng, nhưng bị cắn sẽ thành sói thay vì chết và về phe sói",
                 Constaint.TEAM_VILLAGE,
                 0, 
                 1));
@@ -116,6 +117,7 @@ public class RoleService implements TemplateService{
      * @param role
      */
     public void setPropertyRole(Player p, int role){
+        p.playerEffect = new PlayerEffect();
         p.playerEffect.idRole = (byte)role;
         switch(role){
             case Constaint.ROLE_SOITIENTRI:{
@@ -181,9 +183,9 @@ public class RoleService implements TemplateService{
      * @param game
      */
     public void sendRoleToPlayer(List<Integer> arr, Game game){
-        //Fake
-//        int role2 = Constaint.ROLE_SOI;
-//        int role = Constaint.ROLE_XATHU;
+        //Fake roll
+//        int role2 = Constaint.ROLE_THAYDONG;
+//        int role = Constaint.ROLE_SOI;
 //        for(var p : game.players){
 //            if(p.namePlayer.equals("admin")){
 //                arr.remove((Integer)role);
@@ -203,9 +205,6 @@ public class RoleService implements TemplateService{
 //                int idRole = RandomUtils.getRandom(arr);
 //                arr.remove((Integer)idRole);
 //                RoleService.gI().setPropertyRole(p, idRole);
-//                if(idRole == Constaint.ROLE_THAYDONG){
-//                    game.playersInHell.add(p);
-//                }
 //                MessageService.gI().sendMessagePrivate(p, 
 //                        new Message(Constaint.MESSAGE_PICK_ROLE,role));
 //                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
@@ -217,10 +216,7 @@ public class RoleService implements TemplateService{
             int idRole = RandomUtils.getRandom(arr);
             arr.remove((Integer)idRole);
             RoleService.gI().setPropertyRole(p, idRole);
-            if(idRole == Constaint.ROLE_THAYDONG){
-                game.playersInHell.add(p);
-            }
-            System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
+            //System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
             MessageService.gI().sendMessagePrivate(p, 
                     new Message(Constaint.MESSAGE_PICK_ROLE,idRole));
         }

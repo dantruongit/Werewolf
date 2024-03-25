@@ -548,14 +548,12 @@ public class Create_Room extends javax.swing.JPanel {
         for(var u : ui){
             u.setVisible(!checkboxRandom.isSelected());
         }
-        checkboxShowRole.setSelected(checkboxRandom.isSelected());
     }//GEN-LAST:event_checkboxRandomActionPerformed
 
     private void checkboxShowRoleActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkboxShowRoleActionPerformed
         for(var u : ui){
             u.setVisible(!checkboxRandom.isSelected());
         }
-        checkboxRandom.setSelected(checkboxShowRole.isSelected());
     }//GEN-LAST:event_checkboxShowRoleActionPerformed
 
 

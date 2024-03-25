@@ -39,7 +39,6 @@ public class PanelTime extends javax.swing.JPanel {
         switch(stage.time){
             case Constaint.STAGE_SLEEPING:{
                 url+="status_moon.png";
-                
                 break;
             }
             case Constaint.STAGE_DISCUSSING:
