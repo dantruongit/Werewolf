@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 
 public class StringUtils {
     public static boolean isValidUsername(String username){
-        String regex = "^[a-z0-9]{1,50}$";
+        String regex = "^[a-z0-9]{1,12}$";
         Pattern pattern = Pattern.compile(regex);
         
         if(username == null || username.equals("")){

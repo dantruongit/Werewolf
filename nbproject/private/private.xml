@@ -4,14 +4,9 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Server/RunServer.java</file>
-            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Server/MainFrame.java</file>
-            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Client/Session/Listener.java</file>
             <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Server/service/RoleService.java</file>
-            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Server/Controller/GameController.java</file>
-            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/config/Constaint.java</file>
-            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Server/service/ManagerService.java</file>
-            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Server/service/SocketService.java</file>
-            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Server/service/MessageService.java</file>
+            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Client/Room_List.java</file>
+            <file>file:/C:/Users/cr4zyb0t/Desktop/btl/WerewolfGit/Werewolf/src/Client/GameRoom.java</file>
         </group>
     </open-files>
 </project-private>

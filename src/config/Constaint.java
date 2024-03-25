@@ -92,7 +92,7 @@ public class Constaint {
     //Time
     public static class Time{
         public static int TIME_SLEEPING = 10000; // 25
-        public static int TIME_DISCUSSING = 15000; // 30
+        public static int TIME_DISCUSSING = 10000; // 30
         public static int TIME_VOTING = 10000; //20
     }
     //Message code

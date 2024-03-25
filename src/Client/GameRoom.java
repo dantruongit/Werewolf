@@ -710,6 +710,7 @@ public class GameRoom extends javax.swing.JPanel {
         name8 = new javax.swing.JLabel();
         roleUser8 = new javax.swing.JLabel();
         mainPanel = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
 
         jPanel2.setForeground(new java.awt.Color(255, 255, 255));
         jPanel2.setMinimumSize(new java.awt.Dimension(860, 502));
@@ -1063,6 +1064,15 @@ public class GameRoom extends javax.swing.JPanel {
         jPanel2.add(mainPanel);
         mainPanel.setBounds(400, 20, 380, 90);
 
+        jButton1.setText("addbot");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        jPanel2.add(jButton1);
+        jButton1.setBounds(20, 10, 68, 22);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -1097,7 +1107,7 @@ public class GameRoom extends javax.swing.JPanel {
                 u.function.setVisible(turnFunction);
             }
             //Còn lại là sói không chọn người chết và sói khác
-            else if(idRole == Constaint.ROLE_SOI && !teammateWolfs.contains(u.getUsername()) && !u.isDie)
+            else if(!teammateWolfs.contains(u.getUsername()) && !u.isDie)
                 u.function.setVisible(turnFunction);
         }
     }//GEN-LAST:event_btnFunctionActionPerformed
@@ -1125,6 +1135,10 @@ public class GameRoom extends javax.swing.JPanel {
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         Service.gI().sendMessage(Constaint.MESSAGE_START_GAME, null);
     }//GEN-LAST:event_btnStartActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        Service.gI().sendMessage(Constaint.ADD_BOT, null);
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1158,6 +1172,7 @@ public class GameRoom extends javax.swing.JPanel {
     private javax.swing.JLabel hand6;
     private javax.swing.JLabel hand7;
     private javax.swing.JLabel hand8;
+    private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JPanel mainPanel;

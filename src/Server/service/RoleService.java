@@ -184,42 +184,42 @@ public class RoleService implements TemplateService{
      */
     public void sendRoleToPlayer(List<Integer> arr, Game game){
         //Fake roll
-//        int role2 = Constaint.ROLE_THAYDONG;
-//        int role = Constaint.ROLE_SOI;
-//        for(var p : game.players){
-//            if(p.namePlayer.equals("admin")){
-//                arr.remove((Integer)role);
-//                RoleService.gI().setPropertyRole(p, role);
-//                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)role));
-//                MessageService.gI().sendMessagePrivate(p, 
-//                        new Message(Constaint.MESSAGE_PICK_ROLE,role));
-//            }
-//            else if(p.namePlayer.length() > 5){
-//                arr.remove((Integer)role2);
-//                RoleService.gI().setPropertyRole(p, role2);
-//                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)role2));
-//                MessageService.gI().sendMessagePrivate(p, 
-//                        new Message(Constaint.MESSAGE_PICK_ROLE,role2));
-//            }
-//            else{
-//                int idRole = RandomUtils.getRandom(arr);
-//                arr.remove((Integer)idRole);
-//                RoleService.gI().setPropertyRole(p, idRole);
-//                MessageService.gI().sendMessagePrivate(p, 
-//                        new Message(Constaint.MESSAGE_PICK_ROLE,role));
-//                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
-//            }
-//        }
+        int role2 = Constaint.ROLE_THAYDONG;
+        int role = Constaint.ROLE_SOITIENTRI;
+        for(var p : game.players){
+            if(p.namePlayer.equals("admin")){
+                arr.remove((Integer)role);
+                RoleService.gI().setPropertyRole(p, role);
+                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)role));
+                MessageService.gI().sendMessagePrivate(p, 
+                        new Message(Constaint.MESSAGE_PICK_ROLE,role));
+            }
+            else if(p.namePlayer.length() > 5){
+                arr.remove((Integer)role2);
+                RoleService.gI().setPropertyRole(p, role2);
+                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)role2));
+                MessageService.gI().sendMessagePrivate(p, 
+                        new Message(Constaint.MESSAGE_PICK_ROLE,role2));
+            }
+            else{
+                int idRole = RandomUtils.getRandom(arr);
+                arr.remove((Integer)idRole);
+                RoleService.gI().setPropertyRole(p, idRole);
+                MessageService.gI().sendMessagePrivate(p, 
+                        new Message(Constaint.MESSAGE_PICK_ROLE,role));
+                System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
+            }
+        }
         
         //Real
-        for(Player p: game.players){
-            int idRole = RandomUtils.getRandom(arr);
-            arr.remove((Integer)idRole);
-            RoleService.gI().setPropertyRole(p, idRole);
-            //System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
-            MessageService.gI().sendMessagePrivate(p, 
-                    new Message(Constaint.MESSAGE_PICK_ROLE,idRole));
-        }
+//        for(Player p: game.players){
+//            int idRole = RandomUtils.getRandom(arr);
+//            arr.remove((Integer)idRole);
+//            RoleService.gI().setPropertyRole(p, idRole);
+//            //System.out.println("[Role] " + p.namePlayer + " " + StringUtils.getRoleNameById((byte)idRole));
+//            MessageService.gI().sendMessagePrivate(p, 
+//                    new Message(Constaint.MESSAGE_PICK_ROLE,idRole));
+//        }
         
         game.players.forEach(p -> {
             p.game = game;

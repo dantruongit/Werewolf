@@ -446,6 +446,7 @@ public class GameController {
             p.playerVote = new PlayerVote();
         }
         //Xóa game 
+        RoomService.gI().reloadPlayer(game.room);
         games.removeIf(gController -> gController.game.idGame == game.idGame);
     }
     
