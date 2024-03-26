@@ -1,10 +1,14 @@
 package server;
 
+import Model.Player;
+import Model.Room;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import javax.swing.ImageIcon;
 import javax.swing.UIManager;
 import Server.service.ManagerService;
+import Server.service.PlayerService;
+import Server.service.RoomService;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -44,6 +48,7 @@ public class MainFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         mainTable = new javax.swing.JTable();
         jLabel4 = new javax.swing.JLabel();
+        jButton1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Ma sói - Server");
@@ -98,6 +103,15 @@ public class MainFrame extends javax.swing.JFrame {
         getContentPane().add(jLabel4);
         jLabel4.setBounds(650, 20, 300, 174);
 
+        jButton1.setText("Add");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+        getContentPane().add(jButton1);
+        jButton1.setBounds(20, 300, 140, 50);
+
         pack();
     }// </editor-fold>//GEN-END:initComponents
     private boolean started = false; 
@@ -120,6 +134,18 @@ public class MainFrame extends javax.swing.JFrame {
     private void btnStartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnStartActionPerformed
         startServer();
     }//GEN-LAST:event_btnStartActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        RoomService.gI().rooms.forEach(r ->{
+            int numBot = 9 - r.players.size();
+            for(int i = 0; i < numBot; i++){
+                Player p = PlayerService.gI().getBot(i);
+                r.players.add(p);
+                p.room = r;
+            }
+            RoomService.gI().reloadPlayer(r);
+        });
+    }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
@@ -158,6 +184,7 @@ public class MainFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnStart;
+    private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel4;

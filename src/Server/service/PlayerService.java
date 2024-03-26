@@ -50,6 +50,7 @@ public class PlayerService implements TemplateService{
     
     private AIPlayer makeBot(String nameBot){
         AIPlayer p = new AIPlayer();
+        p.avatarId = (byte)Utils.RandomUtils.nextInt(1, 16);
         p.namePlayer = nameBot;
         p.playerEffect = new PlayerEffect();
         p.isBot = true;

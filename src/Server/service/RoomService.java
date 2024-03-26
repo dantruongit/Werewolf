@@ -19,11 +19,11 @@ public class RoomService implements TemplateService{
     @Override
     public void init(){
         rooms = new ArrayList<>();
-        Room room = new Room();
-        room.idRoom = -1;
-        room.owner = new Player();
-        room.owner.namePlayer = "Admin";
-        rooms.add(room);
+//        Room room = new Room();
+//        room.idRoom = -1;
+//        room.owner = new Player();
+//        room.owner.namePlayer = "Admin";
+//        rooms.add(room);
         ManagerService.initSuccess(nameService);
     }
     

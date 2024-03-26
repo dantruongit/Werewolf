@@ -47,10 +47,10 @@ public class Listener extends Thread{
                         break;
                     }
                     case Constaint.MESSAGE_JOIN_SERVER:{
-//                        if(data == null){
-//                            gui.showMessage("Tên bạn chọn đã có người đặt !");
-//                            break;
-//                        }
+                        if(data == null){
+                            gui.showMessage("Tên bạn chọn đã có người đặt !");
+                            break;
+                        }
                         service.dataSource.player = (Player)data;
                         service.frm.changePanel(new HomePanel());
                         break;
