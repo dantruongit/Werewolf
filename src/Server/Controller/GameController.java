@@ -255,8 +255,6 @@ public class GameController {
     private void calculateStage(){
         try {
             List<Player> playersVoted = getPlayerVoteDie();
-//            List<Player> playersVoted = new ArrayList<>();
-//            playersVoted.add(getPlayerByUsername("3"));
             if(playersVoted.size() == 1){
                 String content;
                 Player pTarget = playersVoted.get(0);
@@ -290,22 +288,30 @@ public class GameController {
                 }
                 //Vote ban ngày của dân
                 else{
-                    setDiePlayer(pTarget);
-                    content = "[Server]: " + pTarget.namePlayer +" đã bị dân làng treo cổ.";
                     Message message = new Message(Constaint.MESSAGE_CHAT, 
-                        content);
-                    MessageService.gI().sendMessageInRoom(game, message);
-                    //Vote vào thằng ngố
-                    if(pTarget.playerEffect.isChuaHe){
-                        message.setMessageCode(Constaint.MESSAGE_JOKER_WIN);
-                        //Cộng điểm cho player
-                        pTarget.gameWin += 1;
-                        MessageService.gI().sendMessageInRoom(game, message);
-                        PlayerService.gI().update();
-                        endGame();
+                        null);
+                    //Số phiếu lớn hơn 1 nửa
+                    if(pTarget.playerVote.voteCount >= game.getPlayerAlive()/2){
+                        setDiePlayer(pTarget);
+                        content = "[Server]: " + pTarget.namePlayer +" đã bị dân làng treo cổ.";
+                        //Vote vào thằng ngố
+                        if(pTarget.playerEffect.isChuaHe){
+                            message.setMessageCode(Constaint.MESSAGE_JOKER_WIN);
+                            //Cộng điểm cho player
+                            pTarget.gameWin += 1;
+                            PlayerService.gI().update();
+                            endGame();
+                        }
+                        //Tính toán win của sói/dân
+                        else
+                            calculateWinGame();
+                        }
+                    else{
+                        content = "[Server]: Không có ai bị chết cả.";
                     }
-                    else
-                        calculateWinGame();
+                    message.setData(content);
+                    MessageService.gI().sendMessageInRoom(game, message);
+                    
                 }
             }
             //Không có phiếu bầu hoặc nhiều phiếu giống nhau
@@ -375,9 +381,6 @@ public class GameController {
             public void main() {
                 int delay = 10000;
                 byte currentState = gameState;
-                MessageService.gI().sendMessageInRoom(game.room, 
-                        new Message(Constaint.STAGE_CHANGE, currentState));
-                
                 //Bắt đầu xử lý các stage hiện tại 
                 switch(currentState){
                     //Thảo luận ban ngày
@@ -418,6 +421,11 @@ public class GameController {
                         break;
                     }
                 }
+                //Gửi thông tin stage thay đổi cho clients
+                Message msg = new Message(Constaint.STAGE_CHANGE, currentState);
+                msg.setTmp(delay); //Thời gian delay
+                MessageService.gI().sendMessageInRoom(game.room, 
+                        msg);
                 //Kết thúc stage
                 try {
                     Thread.sleep(delay + 2800);

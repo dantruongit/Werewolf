@@ -10,6 +10,7 @@
 * Join room
 * Chat
 * Leave room
+* Play game
 ## Requirements recommend
 * IDE : Apache NetBeans IDE 19
 * JDK: 11.0.20 or higher

@@ -101,6 +101,7 @@ public class SocketService implements TemplateService{
                             player.room = room;
                             RoomService.gI().rooms.add(room);
                             writeMessage(response);
+                            PlayerService.gI().update();
                             break;
                         }
                         case Constaint.MESSAGE_LOAD_ROOM:{
@@ -122,6 +123,7 @@ public class SocketService implements TemplateService{
                             }
                             writeMessage(response);
                             RoomService.gI().reloadPlayer(room);
+                            PlayerService.gI().update();
                             break;
                         }
                         case Constaint.ADD_BOT:{
@@ -142,11 +144,10 @@ public class SocketService implements TemplateService{
                             if(room != null){
                                 RoomService.gI().leavedPlayer(player, room);
                                 RoomService.gI().reloadPlayer(room);
+                                PlayerService.gI().update();
                             }
                             break;
                         }
-                        
-                        //Note
                         case Constaint.MESSAGE_START_GAME:{
                             if(this.player.room.owner.namePlayer.equals(this.player.namePlayer)){
                                 this.player.room.startedGame = true;
