@@ -103,17 +103,18 @@ public class Listener extends Thread{
                     case Constaint.STAGE_CHANGE:{
                         byte currentStage = (byte)data;
                         Stage stage;
+                        int delay = (int)message.getTmp();
                         switch(currentStage){
                             case Constaint.STAGE_SLEEPING:{
                                 String messageStatus = Utils.StringUtils.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
-                                stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_SLEEPING);
+                                stage = new Stage(currentStage, messageStatus, delay);
                                 service.panelGame.turnNight();
                                 service.panelGame.updateStage(stage);
                                 break;
                             }
                             case Constaint.STAGE_DISCUSSING:{
                                 String messageStatus = Utils.StringUtils.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
-                                stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_DISCUSSING);
+                                stage = new Stage(currentStage, messageStatus, delay);
                                 service.panelGame.turnDay();
                                 service.panelGame.updateStage(stage);
                                 break;
@@ -121,7 +122,7 @@ public class Listener extends Thread{
                             case Constaint.STAGE_VOTING:{
                                 gui.playSound("votingbell");
                                 String messageStatus = Utils.StringUtils.getMessageStageByRole(currentStage, service.dataSource.player.playerEffect.idRole);
-                                stage = new Stage(currentStage, messageStatus, Constaint.Time.TIME_VOTING);
+                                stage = new Stage(currentStage, messageStatus, delay);
                                 service.panelGame.updateStage(stage);
                                 break;
                             }
